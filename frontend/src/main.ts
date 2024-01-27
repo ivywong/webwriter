@@ -1,34 +1,30 @@
-// import './vanilla.css'
 import './style.css'
 
 const cardContainerClass = "card-container";
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <div id="canvas">
-  </div>
-`
+const app = document.querySelector<HTMLDivElement>('#app');
+
+const canvas = document.createElement("div");
+canvas.id = "canvas";
+app?.appendChild(canvas);
 
 let maxZIndex = 0;
-
-const canvas = document.querySelector('#canvas') as HTMLElement;
 
 function createCardOnCanvas(x: number, y: number) {
   const container = document.createElement("div");
   container.setAttribute("class", cardContainerClass);
   container.style.top = `${y}px`;
   container.style.left = `${x}px`;
-  // container.draggable = true;
-  // container.appendChild(createCardSVG());
   canvas?.appendChild(container);
 }
 
 canvas?.addEventListener("pointerdown", (event: PointerEvent) => {
   console.log(event);
-  const el = event.target as HTMLElement;
+  const el = event.target;
   const pointerId = event.pointerId;
   const offset = { x: event.offsetX, y: event.offsetY };
 
-  if (el?.classList?.contains(cardContainerClass)) {
+  if (el instanceof HTMLElement && el.classList.contains(cardContainerClass)) {
     // bring element to front
     if (el.style.zIndex === "" || el.style.zIndex === "auto" || Number(el.style.zIndex) < maxZIndex) {
       el.style.zIndex = `${maxZIndex + 1}`;
@@ -36,7 +32,7 @@ canvas?.addEventListener("pointerdown", (event: PointerEvent) => {
     }
 
     // ignore move events if we are editing
-    if (el?.classList?.contains("active")) {
+    if (el.classList.contains("active")) {
       return;
     }
 
@@ -70,12 +66,11 @@ canvas?.addEventListener("pointerdown", (event: PointerEvent) => {
 
 canvas?.addEventListener("dblclick", (event: MouseEvent) => {
   console.log(event);
-  const el = event.target as HTMLElement;
+  const el = event.target;
   if (el === canvas) {
     createCardOnCanvas(event.pageX, event.pageY);
   }
-  else if (el.classList.contains(cardContainerClass)) {
-    // do edit mode
+  else if (el instanceof HTMLElement && el.classList.contains(cardContainerClass)) {
     console.log("double clicked card");
     el.contentEditable = "true";
     el.classList.add("active");
@@ -87,6 +82,3 @@ canvas?.addEventListener("dblclick", (event: MouseEvent) => {
     }, { once: true });
   }
 });
-
-
-
