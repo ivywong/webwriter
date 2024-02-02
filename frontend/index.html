@@ -5,16 +5,19 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>webwriter</title>
-    <!--<link rel="stylesheet" type="text/css" href="/src/vanilla.css" />-->
   </head>
   <body>
     <template id="card-template">
       <div class="card-container">
-        <div class="card-corner" style="bottom: -15px; right: -15px;" data-action="resize"></div>
+        <div class="card-corner" data-action="resize"></div>
+        <div class="card-corner" data-action="link"></div>
+        <div class="card-corner" data-action="stack"></div>
         <div class="card-text"></div>
       </div>
     </template>
     <div id="app">
+      <svg class="links"></svg>
+      <div id="canvas"></div>
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
