@@ -68,6 +68,7 @@ svg {
 .card-corner[data-action="resize"] {
     bottom: -5px;
     right: -5px;
+    cursor: col-resize;
 }
 
 .card-corner[data-action="link"] {
@@ -89,6 +90,11 @@ svg {
     filter: drop-shadow(rgb(220, 165, 123) 0.1rem 0.1rem 0.3rem);
     outline-offset: 50px;
     outline: 1px dashed red;
+    cursor: grabbing;
+}
+
+.resizing {
+    cursor: col-resize;
 }
 
 .stacking {

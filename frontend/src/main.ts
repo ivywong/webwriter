@@ -150,7 +150,7 @@ async function handleCardCornerPointerDown(el: HTMLElement, event: PointerEvent)
     const moveCallback = (e: PointerEvent) => {
       if (!el.hasPointerCapture(pointerId)) return;
       
-      parent.classList.add("grabbed");
+      parent.classList.add("grabbed", "resizing");
 
       console.log("grabbed corner");
       console.log(bounds);
@@ -158,19 +158,16 @@ async function handleCardCornerPointerDown(el: HTMLElement, event: PointerEvent)
       // console.log(`w: ${bounds.width}, h: ${bounds.height}, t: ${bounds.top}, l: ${bounds.left}`);
 
       // TODO: fix slight jump due to mouse offset
-      const newW = e.clientX - bounds.left, 
-        newH = e.clientY - bounds.top;
+      const newW = e.clientX - bounds.left;
 
       // console.log(`newW: ${newW}, newH: ${newH}`);
 
       parent.style.maxWidth = "none";
-      parent.style.maxHeight = "none";
       parent.style.width = `${newW}px`;
-      parent.style.height = `${newH}px`;
     };
   
     const cleanup = () => { 
-      parent.classList.remove("grabbed");
+      parent.classList.remove("grabbed", "resizing");
     };
   
     addDragEventListeners(el, pointerId, moveCallback, cleanup);
