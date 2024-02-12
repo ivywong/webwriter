@@ -70,9 +70,9 @@ function addDragEventListeners(
   }
 }
 
-async function handleCardContainerPointerDown(el: HTMLElement, event: PointerEvent) {
-  const pointerId = event.pointerId;
-  const offset = { x: event.offsetX, y: event.offsetY };
+async function handleCardContainerPointerDown(el: HTMLElement, pointDownEvent: PointerEvent) {
+  const pointerId = pointDownEvent.pointerId;
+  const offset = { x: pointDownEvent.offsetX, y: pointDownEvent.offsetY };
 
   console.log("card container pointer down");
   // bring element to front
@@ -86,12 +86,31 @@ async function handleCardContainerPointerDown(el: HTMLElement, event: PointerEve
     return;
   }
 
-  const moveCallback = (e: PointerEvent) => {
+  const moveCallback = (moveEvent: PointerEvent) => {
     if (!el.hasPointerCapture(pointerId)) return;
 
     el.classList.add("grabbed");
-    el.style.left = `${e.pageX - offset.x}px`;
-    el.style.top = `${e.pageY - offset.y}px`; 
+
+    const newX = moveEvent.pageX - offset.x;
+    const newY = moveEvent.pageY - offset.y;
+    el.style.left = `${newX}px`;
+    el.style.top = `${newY}px`;
+
+    const triggerDistance = 50;
+    setTargetCircle(moveEvent.clientX, newY - triggerDistance);
+
+    // check if there is a card element above the current grabbed card and do something
+    let above = document.elementFromPoint(moveEvent.clientX, newY - triggerDistance);
+    console.log(`100above = x: ${moveEvent.clientX}, y: ${newY - triggerDistance}`);
+    console.log("elem from point", above);
+    if ((above instanceof HTMLElement) && (above?.classList.contains(cardContainerClass))) {
+      console.log("found card!");
+      el.classList.add("stacking");
+      el.style.outlineOffset = `${(above.getBoundingClientRect().width - el.getBoundingClientRect().width) / 2}px`;
+    } else {
+      el.classList.remove("stacking");
+      el.style.outlineOffset = "";
+    }
   };
 
   const cleanupDrag = () => { el.classList.remove("grabbed") };
@@ -99,6 +118,27 @@ async function handleCardContainerPointerDown(el: HTMLElement, event: PointerEve
   addDragEventListeners(el, pointerId, moveCallback, cleanupDrag);
 
   console.log("end");
+}
+
+function setTargetCircle(newX: number, newY: number) {
+  let circle = document.querySelector(".target") as HTMLElement;
+  console.log(circle);
+
+  if (!circle) {
+    let circle = document.createElement("div");
+    circle.classList.add("target");
+    circle.style.height = "2px";
+    circle.style.width = "2px";
+    circle.style.border = "1px solid red";
+    circle.style.position = "absolute";
+    circle.style.zIndex = "999999999";
+    circle.style.pointerEvents = "none";
+    canvas.appendChild(circle);
+    setTimeout(() => { console.log("added target circle")}, 0);
+  }
+
+  circle.style.left = `${newX}px`;
+  circle.style.top = `${newY}px`;
 }
 
 async function handleCardCornerPointerDown(el: HTMLElement, event: PointerEvent) {

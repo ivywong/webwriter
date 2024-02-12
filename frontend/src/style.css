@@ -30,7 +30,7 @@ svg {
     height: fit-content;
     max-width: 300px;
     background-color: white;
-    border: 1px solid var(--highlight-color);
+    border: 1px dashed var(--highlight-color);
     padding: 0.5em;
 }
 
@@ -87,4 +87,10 @@ svg {
 
 .grabbed {
     filter: drop-shadow(rgb(220, 165, 123) 0.1rem 0.1rem 0.3rem);
+    outline-offset: 50px;
+    outline: 1px dashed red;
+}
+
+.stacking {
+    outline: 1px dashed blue;
 }
