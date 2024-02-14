@@ -1,4 +1,4 @@
-import { Space, Block, CanvasData } from "./model";
+import { Space, Block, CanvasData, CardView, ContainerPosition } from "./model";
 
 export default class WebwriterLocalStore extends EventTarget {
   localStorageKey: string;
@@ -25,6 +25,7 @@ export default class WebwriterLocalStore extends EventTarget {
     this._setSpaces([new Space()]);
     this._setBlocks([]);
     window.localStorage.removeItem(this.localStorageKey);
+    this._save();
   }
   _readStorage() {
     let localJson = window.localStorage.getItem(this.localStorageKey);
@@ -48,10 +49,7 @@ export default class WebwriterLocalStore extends EventTarget {
     }
   }
   _save() {
-    window.localStorage.setItem(
-      this.localStorageKey,
-      JSON.stringify(this.canvasData)
-    );
+    window.localStorage.setItem(this.localStorageKey, JSON.stringify(this.canvasData));
     this.dispatchEvent(new CustomEvent("save"));
   }
 
@@ -77,6 +75,31 @@ export default class WebwriterLocalStore extends EventTarget {
   addBlock() {
     const block = new Block(this.spaceId);
     this.#blocks.push(block);
+    this._save();
+  }
+
+  getBlock(id: string) {
+    return this.#blocks.find((b) => b.id === id);
+  }
+
+  updateBlockContent(id: string, content: string) {
+    const block = this.getBlock(id);
+    if (block) {
+      block.content = content;
+      this._save();
+    }
+  }
+
+  addCard(position: ContainerPosition) {
+    const block = new Block(this.spaceId);
+    this.#blocks.push(block);
+
+    const card: CardView = {
+      contentId: block.id,
+      position: position,
+      isLocked: false,
+    };
+    this.currentSpace.cards.push(card);
     this._save();
   }
 }

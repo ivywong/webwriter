@@ -1,4 +1,4 @@
-type ContainerPosition = {
+export type ContainerPosition = {
   x: number;
   y: number;
   z: number;
@@ -10,7 +10,7 @@ type Link = {
   to: string;
 };
 
-type CardView = {
+export type CardView = {
   contentId: string;
   position: ContainerPosition;
   isLocked: boolean;
