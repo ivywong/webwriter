@@ -20,29 +20,28 @@ export interface Serializable<T> {
   deserialize(obj: Object): T;
 }
 
-export class CanvasData implements Serializable<CanvasData> {
+export class CanvasData {
   spaces: Space[];
   blocks: Block[];
 
   constructor(spaces: Space[] = [], blocks: Block[] = []) {
     this.spaces = spaces;
     this.blocks = blocks;
-
-    this.spaces.push(new Space());
   }
 
-  deserialize(obj: any): CanvasData {
-    this.spaces = obj.spaces.map((s: any) => {
-      new Space().deserialize(s);
+  static deserialize(obj: any): CanvasData {
+    const data = new CanvasData();
+    data.spaces = obj.spaces.map((s: any) => {
+      return Space.deserialize(s);
     });
-    this.blocks = obj.blocks.map((b: any) => {
-      new Block("").deserialize(b);
+    data.blocks = obj.blocks.map((b: any) => {
+      return Block.deserialize(b);
     });
-    return this;
+    return data;
   }
 }
 
-export class Block implements Serializable<Block> {
+export class Block {
   id: string;
   content: string = ""; // TODO: possibly integrate with CodeMirror
   spaceId: string;
@@ -61,17 +60,18 @@ export class Block implements Serializable<Block> {
     this.content = text;
   }
 
-  deserialize(obj: any) {
-    this.id = obj.id;
-    this.content = obj.content;
-    this.spaceId = obj.origin;
-    this.created = obj.created;
-    this.last_updated = obj.last_updated;
-    return this;
+  static deserialize(obj: any) {
+    const b = new Block(obj.origin);
+    b.id = obj.id;
+    b.content = obj.content;
+    b.spaceId = obj.origin;
+    b.created = obj.created;
+    b.last_updated = obj.last_updated;
+    return b;
   }
 }
 
-export class Stack implements Serializable<Stack> {
+export class Stack {
   id: string;
   position: ContainerPosition;
   blockIds: string[];
@@ -88,17 +88,18 @@ export class Stack implements Serializable<Stack> {
     this.blockIds.push(blockId);
   }
 
-  deserialize(obj: any) {
-    this.id = obj.id;
-    this.position = obj.position;
-    this.blockIds = obj.blockIds;
-    this.isLocked = obj.isLocked;
-    this.isCollapsed = obj.isCollapsed;
-    return this;
+  static deserialize(obj: any) {
+    const s = new Stack({ x: 0, y: 0, z: 0, w: -1 });
+    s.id = obj.id;
+    s.position = obj.position;
+    s.blockIds = obj.blockIds;
+    s.isLocked = obj.isLocked;
+    s.isCollapsed = obj.isCollapsed;
+    return s;
   }
 }
 
-export class Space implements Serializable<Space> {
+export class Space {
   id: string;
   stacks: Stack[] = [];
   cards: CardView[] = [];
@@ -108,13 +109,14 @@ export class Space implements Serializable<Space> {
     this.id = `space-${crypto.randomUUID()}`;
   }
 
-  deserialize(obj: any) {
-    this.id = obj.id;
-    this.stacks = obj.stacks.map((s: any) => {
-      new Stack({ x: 0, y: 0, z: 0, w: -1 }).deserialize(s);
+  static deserialize(obj: any) {
+    const s = new Space();
+    s.id = obj.id;
+    s.stacks = obj.stacks.map((s: any) => {
+      Stack.deserialize(s);
     });
-    this.cards = obj.cards;
-    this.links = obj.links;
-    return this;
+    s.cards = obj.cards;
+    s.links = obj.links;
+    return s;
   }
 }

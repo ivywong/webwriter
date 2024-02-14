@@ -2,54 +2,51 @@ import { Space, Block, CanvasData } from "./model";
 
 export default class WebwriterLocalStore extends EventTarget {
   localStorageKey: string;
-  spaceId: string;
-  canvasData: CanvasData;
+  #spaces: Space[] = [new Space()];
+  spaceId: string = this.#spaces[0].id;
+  #blocks: Block[] = [];
 
   constructor(localStorageKey: string) {
     super();
     this.localStorageKey = localStorageKey;
-    this.spaceId = ""; // TODO: handle creating a new space
-    this.canvasData = new CanvasData();
     this._readStorage();
 
     window.addEventListener(
       "storage",
       () => {
+        // TODO: handle multiple tabs
         this._readStorage();
         this._save();
       },
       false
     );
   }
-  _resetStore = () => {
-    this.canvasData = new CanvasData();
-    this.spaceId = this.canvasData.spaces[0].id;
+  _resetStore() {
+    this._setSpaces([new Space()]);
+    this._setBlocks([]);
     window.localStorage.removeItem(this.localStorageKey);
-  };
-  _readStorage = () => {
+  }
+  _readStorage() {
     let localJson = window.localStorage.getItem(this.localStorageKey);
     if (localJson) {
       this._parseCanvasData(localJson);
     } else {
       console.log("No data found in localstorage.");
     }
-  };
-  _parseCanvasData = (json: string) => {
+  }
+  _parseCanvasData(json: string) {
     try {
       const parsed = JSON.parse(json);
       if (parsed) {
-        console.log(`parsed JSON`, parsed);
-
-        // TODO: fix bug (TypeError: this.canvasData.spaces[0] is undefined)
-        this.canvasData = new CanvasData().deserialize(parsed);
-        if (this.canvasData.spaces.length > 0) {
-          this.spaceId = this.canvasData.spaces[0].id;
-        }
+        console.log(`parsed local storage JSON: `, parsed);
+        const canvasData = CanvasData.deserialize(parsed);
+        this._setSpaces(canvasData.spaces);
+        this._setBlocks(canvasData.blocks);
       }
     } catch (err) {
       console.error("Failed to read data from local storage: ", err);
     }
-  };
+  }
   _save() {
     window.localStorage.setItem(
       this.localStorageKey,
@@ -58,30 +55,28 @@ export default class WebwriterLocalStore extends EventTarget {
     this.dispatchEvent(new CustomEvent("save"));
   }
 
-  get spaces() {
-    return this.canvasData.spaces;
+  get canvasData() {
+    return new CanvasData(this.#spaces, this.#blocks);
   }
 
   get currentSpace() {
-    return this.canvasData.spaces[0];
+    return this.#spaces[0];
   }
 
-  get blocks() {
-    return this.canvasData.blocks;
+  _setSpaces(spaces: Space[]) {
+    this.#spaces = spaces;
+    if (this.#spaces.length > 0) {
+      this.spaceId = this.#spaces[0].id;
+    }
   }
 
-  set spaces(spaces: Space[]) {
-    this.canvasData.spaces = spaces;
-  }
-
-  set blocks(blocks: Block[]) {
-    this.canvasData.blocks = blocks;
+  _setBlocks(blocks: Block[]) {
+    this.#blocks = blocks;
   }
 
   addBlock() {
     const block = new Block(this.spaceId);
-    this.blocks.push(block);
+    this.#blocks.push(block);
     this._save();
-    return block;
   }
 }

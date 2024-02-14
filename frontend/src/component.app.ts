@@ -13,27 +13,25 @@ export class AppComponent {
     this.reset = $root.getElementById("reset") as HTMLButtonElement;
     this.store = store;
 
-    console.log("store: ", this.store);
-
     this._bindEvents();
     this.render();
   }
-  _bindEvents = () => {
-    this.store.addEventListener("save", this.render);
+
+  _bindEvents() {
+    this.store.addEventListener("save", this.render.bind(this));
 
     this.reset.addEventListener("click", (evt: MouseEvent) => {
       this.store._resetStore();
-      console.log("reset store");
-      console.log("store: ", this.store.canvasData);
+      console.log("reset store data: ", this.store.canvasData);
     });
 
     this.canvas.addEventListener("dblclick", (evt: MouseEvent) => {
-      console.log("add block");
+      console.log("adding block");
       this.store.addBlock();
     });
-  };
-  render = () => {
+  }
+  render() {
     console.log("rerendering!");
-    console.log("store: ", this.store.canvasData);
-  };
+    console.log("store data: ", this.store.canvasData);
+  }
 }
