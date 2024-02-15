@@ -1,7 +1,9 @@
 :root {
-  font-family: Arial, Helvetica, sans-serif;
+  --font-family: Arial, Helvetica, sans-serif;
   background-color: cornsilk;
   --highlight-color: rgb(159, 78, 65);
+
+  --shadow-color: 26deg 58% 67%;
 }
 
 html,
@@ -40,6 +42,17 @@ svg {
   overflow: auto;
   width: 100%;
   height: 100%;
+  resize: none;
+  border: none;
+  font-family: var(--font-family);
+}
+
+.card-text:focus-visible {
+  outline: none;
+}
+
+.card-container:focus-within {
+  border: 2px double var(--highlight-color);
 }
 
 .card-container:not(.active) .card-text {
@@ -89,7 +102,7 @@ svg {
 }
 
 .grabbed {
-  filter: drop-shadow(rgb(220, 165, 123) 0.1rem 0.1rem 0.3rem);
+  filter: drop-shadow(hsl(var(--shadow-color)) 0.1rem 0.1rem 0.3rem);
   outline-offset: 50px;
   outline: 1px dashed red;
   cursor: grabbing;

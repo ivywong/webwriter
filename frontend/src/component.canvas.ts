@@ -17,6 +17,10 @@ export class CanvasComponent {
     this.renderAll();
   }
 
+  _isCardContainer(value: unknown): value is HTMLElement {
+    return value instanceof HTMLElement && value.classList.contains(cardContainerClass);
+  }
+
   _bindEvents() {
     this.$root.addEventListener("dblclick", (evt: MouseEvent) => {
       console.log(evt);
@@ -30,10 +34,7 @@ export class CanvasComponent {
           z: 10,
           w: -1,
         });
-      } else if (
-        target instanceof HTMLElement &&
-        target.classList.contains(cardContainerClass)
-      ) {
+      } else if (this._isCardContainer(target)) {
         console.log("double clicked card");
 
         // ignore events if we are already editing
