@@ -1,3 +1,4 @@
+import { deepEquals } from "./helper";
 import { Space, Block, CanvasData, CardView, ContainerPosition } from "./model";
 
 export default class WebwriterLocalStore extends EventTarget {
@@ -90,6 +91,10 @@ export default class WebwriterLocalStore extends EventTarget {
     }
   }
 
+  getCardById(id: string) {
+    return this.currentSpace.cards.find((c) => c.contentId === id);
+  }
+
   addCard(position: ContainerPosition) {
     const block = new Block(this.spaceId);
     this.#blocks.push(block);
@@ -101,5 +106,22 @@ export default class WebwriterLocalStore extends EventTarget {
     };
     this.currentSpace.cards.push(card);
     this._save();
+  }
+
+  updateCardPosition(cardId: string, position: Partial<ContainerPosition>) {
+    const card = this.getCardById(cardId);
+    if (card) {
+      const mergedPosition = { ...card.position, ...position };
+
+      if (deepEquals(card.position, mergedPosition)) {
+        return;
+      }
+
+      card.position = mergedPosition;
+      this._save();
+      console.log(`saved card ${cardId} position`, card.position);
+    } else {
+      console.error(`${cardId} not found!`);
+    }
   }
 }

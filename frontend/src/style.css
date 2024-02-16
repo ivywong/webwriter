@@ -103,8 +103,8 @@ svg {
 
 .grabbed {
   filter: drop-shadow(hsl(var(--shadow-color)) 0.1rem 0.1rem 0.3rem);
-  outline-offset: 50px;
-  outline: 1px dashed red;
+  /* outline-offset: 50px; */
+  /* outline: 1px dashed red; */
   cursor: grabbing;
 }
 
