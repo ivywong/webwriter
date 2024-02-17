@@ -16,7 +16,9 @@ export class CanvasComponent {
   constructor($root: HTMLDivElement, store: WebwriterLocalStore) {
     this.$root = $root;
     this.store = store;
-    this.maxZIndex = Math.max(...this.store.currentSpace.cards.map((c) => c.position.z));
+    this.maxZIndex =
+      Math.max(...this.store.currentSpace.cards.map((c) => c.position.z)) + 1;
+    console.log(this.maxZIndex);
 
     this._bindEvents();
     this.renderAll();
@@ -55,7 +57,6 @@ export class CanvasComponent {
       autosize(textbox);
       let content = this.store.getBlock(card.contentId)?.content as string;
       textbox.value = content;
-      autosize.update(textbox);
     }
 
     container.style.top = `${card.position.y}px`;
@@ -65,8 +66,10 @@ export class CanvasComponent {
 
     if (card.position.w !== -1) {
       container.style.maxWidth = "none";
-      container.style.width = `${card.position.w}`;
+      container.style.width = `${card.position.w}px`;
     }
+
+    autosize.update(textbox);
 
     console.log(container);
 
@@ -85,7 +88,7 @@ export class CanvasComponent {
       this._handleCardContainerPointerDown(target, evt);
     }
     if (this._isCardCorner("resize", target)) {
-      // do sth
+      this._resizeHandler(target, evt);
     }
   }
 
@@ -136,6 +139,45 @@ export class CanvasComponent {
 
     addDragEventListeners(card, pointerId, moveCallback, cleanupDrag);
   }
+
+  private _resizeHandler(target: HTMLDivElement, evt: PointerEvent): void {
+    const pointerId = evt.pointerId;
+    const card = target.parentElement as HTMLDivElement;
+    const textbox = card.querySelector(".card-text") as HTMLTextAreaElement;
+    const bounds = card?.getBoundingClientRect();
+
+    let textWidth = bounds.width;
+
+    const moveCallback = (e: PointerEvent) => {
+      if (!target.hasPointerCapture(pointerId)) return;
+
+      card.classList.add("grabbed", "resizing");
+
+      console.log("grabbed corner");
+
+      // TODO: fix slight jump due to mouse offset
+      textWidth = e.clientX - bounds.left;
+
+      console.log(`newW: ${textWidth}`);
+
+      card.style.maxWidth = "none";
+      card.style.width = `${textWidth}px`;
+
+      autosize.update(textbox);
+    };
+
+    const cleanup = () => {
+      console.log("cleaning up");
+      console.log(`width: ${textWidth}`);
+      card.classList.remove("grabbed", "resizing");
+      this.store.updateCardPosition(card.dataset.contentId as string, {
+        w: textWidth,
+      });
+    };
+
+    addDragEventListeners(target, pointerId, moveCallback, cleanup);
+  }
+
   private _doubleClickHandler(evt: MouseEvent): void {
     console.log(evt);
     const target = evt.target;

@@ -114,6 +114,7 @@ export default class WebwriterLocalStore extends EventTarget {
       const mergedPosition = { ...card.position, ...position };
 
       if (deepEquals(card.position, mergedPosition)) {
+        console.log("card dimensions not changed!");
         return;
       }
 
