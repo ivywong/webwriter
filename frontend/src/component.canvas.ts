@@ -6,7 +6,7 @@ import { addDragEventListeners } from "./helper";
 const cardContainerClass = "card-container";
 const cardCornerClass = "card-corner";
 
-type CardCornerAction = "resize" | "link" | "stack";
+type CardCornerAction = "resize" | "link" | "stack" | "delete";
 
 export class CanvasComponent {
   $root: HTMLDivElement;
@@ -39,11 +39,15 @@ export class CanvasComponent {
     this.$root.addEventListener("dblclick", this._doubleClickHandler.bind(this));
 
     this.store.addEventListener("addCard", (evt: CustomEventInit) => {
-      this.renderCard(evt.detail);
+      this.renderAddCard(evt.detail);
+    });
+
+    this.store.addEventListener("deleteCard", (evt: CustomEventInit) => {
+      this.renderRemoveCard(evt.detail);
     });
   }
 
-  renderCard(card: CardView) {
+  renderAddCard(card: CardView) {
     let cardTemplate = document.querySelector("#card-template") as HTMLTemplateElement;
 
     let cloned = cardTemplate.content.cloneNode(true);
@@ -80,9 +84,19 @@ export class CanvasComponent {
     return container;
   }
 
+  renderRemoveCard(id: string) {
+    const target = this.$root.querySelector(`[data-content-id='${id}']`);
+    if (target) {
+      this.$root.removeChild(target);
+      console.log(`Removed card: ${id}`);
+    } else {
+      console.error(`Could not find and remove card: ${id}`);
+    }
+  }
+
   renderAll() {
     this.$root.innerHTML = "";
-    this.store.currentSpace.cards.forEach((card) => this.renderCard(card));
+    this.store.currentSpace.cards.forEach((card) => this.renderAddCard(card));
   }
 
   private _pointerDownHandler(evt: PointerEvent) {
@@ -93,6 +107,10 @@ export class CanvasComponent {
     }
     if (this._isCardCorner("resize", target)) {
       this._resizeHandler(target, evt);
+    } else if (this._isCardCorner("delete", target)) {
+      if (target.parentElement?.dataset.contentId) {
+        this.store.deleteCard(target.parentElement.dataset.contentId);
+      }
     }
     if (target === this.$root) {
       for (let el of this.$root.querySelectorAll(".selected")) {

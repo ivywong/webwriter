@@ -128,4 +128,12 @@ export default class WebwriterLocalStore extends EventTarget {
       console.error(`${cardId} not found!`);
     }
   }
+
+  deleteCard(contentId: string) {
+    this._setBlocks(this.#blocks.filter((b) => b.id !== contentId));
+    this.currentSpace.cards = this.currentSpace.cards.filter(
+      (c) => c.contentId !== contentId
+    );
+    this._save("deleteCard", contentId);
+  }
 }
