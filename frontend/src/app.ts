@@ -15,4 +15,5 @@ const renderAll = () => {
   Canvas.renderAll();
 };
 
-LocalStore.addEventListener("save", renderAll);
+renderAll();
+// LocalStore.addEventListener("save", renderAll);

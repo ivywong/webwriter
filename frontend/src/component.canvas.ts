@@ -37,6 +37,10 @@ export class CanvasComponent {
   _bindEvents() {
     this.$root.addEventListener("pointerdown", this._pointerDownHandler.bind(this));
     this.$root.addEventListener("dblclick", this._doubleClickHandler.bind(this));
+
+    this.store.addEventListener("addCard", (evt: CustomEventInit) => {
+      this.renderCard(evt.detail);
+    });
   }
 
   renderCard(card: CardView) {
@@ -90,6 +94,11 @@ export class CanvasComponent {
     if (this._isCardCorner("resize", target)) {
       this._resizeHandler(target, evt);
     }
+    if (target === this.$root) {
+      for (let el of this.$root.querySelectorAll(".selected")) {
+        el.classList.remove("selected");
+      }
+    }
   }
 
   private _handleCardContainerPointerDown(
@@ -118,6 +127,13 @@ export class CanvasComponent {
     if (card.classList.contains("active")) {
       return;
     }
+
+    // TODO: toggle bulk selection, e.g. ctrl/cmd click
+    for (let el of this.$root.querySelectorAll(".selected")) {
+      el.classList.remove("selected");
+    }
+
+    card.classList.add("selected");
 
     const moveCallback = (moveEvent: PointerEvent) => {
       if (!card.hasPointerCapture(pointerId)) return;

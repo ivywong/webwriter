@@ -49,9 +49,11 @@ export default class WebwriterLocalStore extends EventTarget {
       console.error("Failed to read data from local storage: ", err);
     }
   }
-  _save() {
+  _save(event?: string, data?: unknown) {
     window.localStorage.setItem(this.localStorageKey, JSON.stringify(this.canvasData));
-    this.dispatchEvent(new CustomEvent("save"));
+    this.dispatchEvent(
+      new CustomEvent(event ? event : "save", data ? { detail: data } : undefined)
+    );
   }
 
   get canvasData() {
@@ -76,7 +78,7 @@ export default class WebwriterLocalStore extends EventTarget {
   addBlock() {
     const block = new Block(this.spaceId);
     this.#blocks.push(block);
-    this._save();
+    this._save("addBlock", block);
   }
 
   getBlock(id: string) {
@@ -87,7 +89,7 @@ export default class WebwriterLocalStore extends EventTarget {
     const block = this.getBlock(id);
     if (block) {
       block.content = content;
-      this._save();
+      this._save("updateBlock", block);
     }
   }
 
@@ -105,7 +107,8 @@ export default class WebwriterLocalStore extends EventTarget {
       isLocked: false,
     };
     this.currentSpace.cards.push(card);
-    this._save();
+
+    this._save("addCard", card);
   }
 
   updateCardPosition(cardId: string, position: Partial<ContainerPosition>) {
@@ -119,7 +122,7 @@ export default class WebwriterLocalStore extends EventTarget {
       }
 
       card.position = mergedPosition;
-      this._save();
+      this._save("updateCardPosition", card);
       console.log(`saved card ${cardId} position`, card.position);
     } else {
       console.error(`${cardId} not found!`);

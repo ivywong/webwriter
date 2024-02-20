@@ -4,6 +4,7 @@
   --highlight-color: rgb(159, 78, 65);
 
   --shadow-color: 26deg 58% 67%;
+  --font-color: black;
 }
 
 html,
@@ -45,6 +46,7 @@ svg {
   resize: none;
   border: none;
   font-family: var(--font-family);
+  color: var(--font-color);
 }
 
 .card-text:focus-visible {
@@ -106,6 +108,10 @@ svg {
   /* outline-offset: 50px; */
   /* outline: 1px dashed red; */
   cursor: grabbing;
+}
+
+.selected {
+  border: 1px solid var(--highlight-color);
 }
 
 .resizing {
