@@ -124,7 +124,7 @@ export class CanvasComponent {
     }
 
     // ignore move events if we are editing
-    if (card.classList.contains("active")) {
+    if (card.classList.contains("editing")) {
       return;
     }
 
@@ -210,7 +210,7 @@ export class CanvasComponent {
       console.log("double clicked card");
 
       // ignore events if we are already editing
-      if (target.classList.contains("active")) {
+      if (target.classList.contains("editing")) {
         return;
       }
 
@@ -219,7 +219,7 @@ export class CanvasComponent {
       textbox.disabled = false;
       textbox.focus();
 
-      target.classList.add("active");
+      target.classList.add("editing");
 
       textbox.addEventListener("blur", () => {
         console.log(textbox.value);
@@ -233,7 +233,7 @@ export class CanvasComponent {
         "focusout",
         () => {
           textbox.disabled = true;
-          target.classList.remove("active");
+          target.classList.remove("editing");
         },
         { once: true }
       );

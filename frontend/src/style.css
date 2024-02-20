@@ -1,8 +1,7 @@
 :root {
   --font-family: Arial, Helvetica, sans-serif;
-  background-color: cornsilk;
-  --highlight-color: rgb(159, 78, 65);
-
+  background-color: hsl(48, 100%, 93%);
+  --highlight-color: hsl(8, 42%, 44%);
   --shadow-color: 26deg 58% 67%;
   --font-color: black;
 }
@@ -57,13 +56,13 @@ svg {
   border: 2px double var(--highlight-color);
 }
 
-.card-container:not(.active) .card-text {
+.card-container:not(.editing) .card-text {
   -webkit-user-select: none;
   user-select: none;
   pointer-events: none;
 }
 
-.card-container.active .card-text {
+.card-container.editing .card-text {
   -webkit-user-select: auto;
   user-select: auto;
   pointer-events: auto;
