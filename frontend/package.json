@@ -2,6 +2,8 @@
   "name": "webwriter-client",
   "version": "0.0.0",
   "devDependencies": {
+    "@types/markdown-it": "^13.0.7",
+    "@types/autosize": "^4.0.3",
     "typescript": "^5.2.2",
     "vite": "^5.0.8"
   },
@@ -13,8 +15,8 @@
   },
   "type": "module",
   "dependencies": {
-    "@types/autosize": "^4.0.3",
     "autosize": "^6.0.1",
+    "markdown-it": "^14.0.0",
     "ts-debounce": "^4.0.0"
   }
 }

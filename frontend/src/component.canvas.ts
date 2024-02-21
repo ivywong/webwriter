@@ -1,7 +1,10 @@
 import WebwriterLocalStore from "./store";
-import { CardView, ContainerPosition } from "./model";
+import { Block, CardView, ContainerPosition } from "./model";
 import autosize from "autosize";
 import { addDragEventListeners } from "./helper";
+import markdownit from "markdown-it";
+
+const MarkdownIt = markdownit();
 
 const cardContainerClass = "card-container";
 const cardCornerClass = "card-corner";
@@ -45,6 +48,10 @@ export class CanvasComponent {
     this.store.addEventListener("deleteCard", (evt: CustomEventInit) => {
       this.renderRemoveCard(evt.detail);
     });
+
+    this.store.addEventListener("updateBlock", (evt: CustomEventInit) => {
+      this.renderUpdatedText(evt.detail);
+    });
   }
 
   renderAddCard(card: CardView) {
@@ -54,18 +61,21 @@ export class CanvasComponent {
     this.$root.appendChild(cloned);
 
     const container = this.$root.querySelector(`.${cardContainerClass}:last-of-type`);
+    const content = this.store.getBlock(card.contentId)?.content as string;
 
     if (!this._isCardContainer(container)) {
       throw new Error("Failed to add new card!");
     }
 
-    console.log(container);
     const textbox = container.querySelector(`.card-text`) as HTMLTextAreaElement;
     if (textbox) {
       autosize(textbox);
-      let content = this.store.getBlock(card.contentId)?.content as string;
       textbox.value = content;
+      textbox.style.display = "none";
     }
+
+    const preview = container.querySelector(".card-text-rendered") as HTMLDivElement;
+    preview.innerHTML = MarkdownIt.render(content);
 
     container.style.top = `${card.position.y}px`;
     container.style.left = `${card.position.x}px`;
@@ -92,6 +102,14 @@ export class CanvasComponent {
     } else {
       console.error(`Could not find and remove card: ${id}`);
     }
+  }
+
+  renderUpdatedText(block: Block) {
+    const rendered = this.$root.querySelector(
+      `[data-content-id='${block.id}'] .card-text-rendered`
+    ) as HTMLDivElement;
+    rendered.innerHTML = MarkdownIt.render(block.content);
+    console.log(`rendered block: ${block.id}`);
   }
 
   renderAll() {
@@ -187,12 +205,8 @@ export class CanvasComponent {
 
       card.classList.add("grabbed", "resizing");
 
-      console.log("grabbed corner");
-
       // TODO: fix slight jump due to mouse offset
       textWidth = e.clientX - bounds.left;
-
-      console.log(`newW: ${textWidth}`);
 
       card.style.maxWidth = "none";
       card.style.width = `${textWidth}px`;
@@ -201,8 +215,6 @@ export class CanvasComponent {
     };
 
     const cleanup = () => {
-      console.log("cleaning up");
-      console.log(`width: ${textWidth}`);
       card.classList.remove("grabbed", "resizing");
       this.store.updateCardPosition(card.dataset.contentId as string, {
         w: textWidth,
@@ -233,14 +245,19 @@ export class CanvasComponent {
       }
 
       const textbox = target.querySelector(".card-text") as HTMLTextAreaElement;
+      const preview = target.querySelector(".card-text-rendered") as HTMLDivElement;
 
+      preview.style.display = "none";
+      textbox.style.display = "block";
       textbox.disabled = false;
+
+      autosize.update(textbox);
       textbox.focus();
 
       target.classList.add("editing");
 
       textbox.addEventListener("blur", () => {
-        console.log(textbox.value);
+        console.log(`saving content: ${target.dataset.contentId}`);
         this.store.updateBlockContent(
           target.dataset.contentId as string,
           textbox.value as string
@@ -252,6 +269,8 @@ export class CanvasComponent {
         () => {
           textbox.disabled = true;
           target.classList.remove("editing");
+          preview.style.display = "block";
+          textbox.style.display = "none";
         },
         { once: true }
       );

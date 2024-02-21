@@ -2,7 +2,8 @@ import { AppComponent } from "./component.app";
 import { CanvasComponent } from "./component.canvas";
 import WebwriterLocalStore from "./store";
 
-import "./style.css";
+import "./css/reset.css";
+import "./css/style.css";
 
 const LocalStore = new WebwriterLocalStore("webwriter");
 const App = new AppComponent(document, LocalStore);
