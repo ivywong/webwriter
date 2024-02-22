@@ -50,6 +50,18 @@ export class CanvasComponent {
   }
 
   _setupHotkeys() {
+    hotkeys("ctrl+z, command+z", { scope: "canvas" }, () => {
+      console.log("undo canvas state");
+    });
+
+    hotkeys(
+      "ctrl+shift+z, command+shift+z, ctrl+y, command+y",
+      { scope: "canvas" },
+      () => {
+        console.log("redo canvas state");
+      }
+    );
+
     hotkeys("delete, backspace", { scope: "canvas" }, () => {
       const cardToDelete = this.lastSelectedCardId;
       if (cardToDelete) {
@@ -68,6 +80,10 @@ export class CanvasComponent {
         console.log(`editing: ${this.lastSelectedCardId}`);
         this._editCard(this.lastSelectedCardId);
       }
+    });
+
+    hotkeys("esc", { scope: "canvas" }, () => {
+      this._deselectAll();
     });
 
     hotkeys("*", (event, handler) => {
@@ -308,10 +324,8 @@ export class CanvasComponent {
         console.log(`saving content: ${cardId}`);
         this.store.updateBlockContent(cardId, textbox.value as string);
 
-        this._deselect(cardId);
-
         textbox.disabled = true;
-        target.classList.remove("editing", "selected");
+        target.classList.remove("editing");
 
         preview.style.display = "block";
         textbox.style.display = "none";
