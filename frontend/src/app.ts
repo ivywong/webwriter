@@ -17,4 +17,3 @@ const renderAll = () => {
 };
 
 renderAll();
-// LocalStore.addEventListener("save", renderAll);

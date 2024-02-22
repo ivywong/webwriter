@@ -1,8 +1,10 @@
 import WebwriterLocalStore from "./store";
 import { Block, CardView, ContainerPosition } from "./model";
-import autosize from "autosize";
 import { addDragEventListeners } from "./helper";
+
+import autosize from "autosize";
 import markdownit from "markdown-it";
+import hotkeys from "hotkeys-js";
 
 const MarkdownIt = markdownit();
 
@@ -14,17 +16,27 @@ type CardCornerAction = "resize" | "link" | "stack" | "delete";
 export class CanvasComponent {
   $root: HTMLDivElement;
   store: WebwriterLocalStore;
+  selectedCardIds: string[];
   maxZIndex: number;
 
   constructor($root: HTMLDivElement, store: WebwriterLocalStore) {
     this.$root = $root;
     this.store = store;
+    this.selectedCardIds = [];
     this.maxZIndex =
       Math.max(...this.store.currentSpace.cards.map((c) => c.position.z)) + 1;
     console.log(this.maxZIndex);
 
+    this._setupHotkeys();
     this._bindEvents();
     this.renderAll();
+  }
+
+  get lastSelectedCardId() {
+    if (this.selectedCardIds.length > 0) {
+      return this.selectedCardIds[this.selectedCardIds.length - 1];
+    }
+    return null;
   }
 
   _isCardContainer(value: unknown): value is HTMLDivElement {
@@ -37,9 +49,44 @@ export class CanvasComponent {
     return value instanceof HTMLDivElement && value.dataset.action === action;
   }
 
+  _setupHotkeys() {
+    hotkeys("delete, backspace", { scope: "canvas" }, () => {
+      const cardToDelete = this.lastSelectedCardId;
+      if (cardToDelete) {
+        // delete last selected card for now
+        console.log(`deleting: ${cardToDelete}`);
+        this._deselect(cardToDelete);
+        this.store.deleteCard(cardToDelete);
+      }
+    });
+
+    hotkeys("enter", { scope: "canvas" }, (evt) => {
+      evt.preventDefault();
+      console.log("edit selected card here");
+
+      if (this.lastSelectedCardId) {
+        console.log(`editing: ${this.lastSelectedCardId}`);
+        this._editCard(this.lastSelectedCardId);
+      }
+    });
+
+    hotkeys("*", (event, handler) => {
+      // TODO: figure out if there's a way of using this to remap keys
+      console.log(event.key, handler.key);
+    });
+
+    hotkeys.setScope("canvas");
+  }
+
   _bindEvents() {
     this.$root.addEventListener("pointerdown", this._pointerDownHandler.bind(this));
     this.$root.addEventListener("dblclick", this._doubleClickHandler.bind(this));
+    this.$root.addEventListener("keydown", (evt) => {
+      if (evt.target instanceof HTMLTextAreaElement && evt.key === "Escape") {
+        console.log("blurring textarea");
+        evt.target.blur();
+      }
+    });
 
     this.store.addEventListener("addCard", (evt: CustomEventInit) => {
       this.renderAddCard(evt.detail);
@@ -68,11 +115,9 @@ export class CanvasComponent {
     }
 
     const textbox = container.querySelector(`.card-text`) as HTMLTextAreaElement;
-    if (textbox) {
-      autosize(textbox);
-      textbox.value = content;
-      textbox.style.display = "none";
-    }
+    autosize(textbox);
+    textbox.value = content;
+    textbox.style.display = "none";
 
     const preview = container.querySelector(".card-text-rendered") as HTMLDivElement;
     preview.innerHTML = MarkdownIt.render(content);
@@ -117,23 +162,38 @@ export class CanvasComponent {
     this.store.currentSpace.cards.forEach((card) => this.renderAddCard(card));
   }
 
+  _deselect(id: string) {
+    const idx = this.selectedCardIds.indexOf(id);
+    if (idx > -1) {
+      console.log(`deselecting card: ${id}`);
+      this.selectedCardIds.splice(idx, 1);
+    } else {
+      console.debug(`deselecting failed: ${id} not found`);
+      console.debug(`selected: ${this.selectedCardIds}`);
+    }
+  }
+
+  _deselectAll() {
+    for (let el of this.$root.querySelectorAll(".selected")) {
+      console.log("deselecting all");
+      el.classList.remove("selected");
+      this.selectedCardIds = [];
+    }
+  }
+
   private _pointerDownHandler(evt: PointerEvent) {
     console.log(evt);
     const target = evt.target;
     if (this._isCardContainer(target)) {
       this._handleCardContainerPointerDown(target, evt);
-    }
-    if (this._isCardCorner("resize", target)) {
+    } else if (this._isCardCorner("resize", target)) {
       this._resizeHandler(target, evt);
     } else if (this._isCardCorner("delete", target)) {
       if (target.parentElement?.dataset.contentId) {
         this.store.deleteCard(target.parentElement.dataset.contentId);
       }
-    }
-    if (target === this.$root) {
-      for (let el of this.$root.querySelectorAll(".selected")) {
-        el.classList.remove("selected");
-      }
+    } else if (target === this.$root) {
+      this._deselectAll();
     }
   }
 
@@ -165,11 +225,10 @@ export class CanvasComponent {
     }
 
     // TODO: toggle bulk selection, e.g. ctrl/cmd click
-    for (let el of this.$root.querySelectorAll(".selected")) {
-      el.classList.remove("selected");
-    }
+    this._deselectAll();
 
     card.classList.add("selected");
+    this.selectedCardIds.push(card.dataset.contentId as string);
 
     const moveCallback = (moveEvent: PointerEvent) => {
       if (!card.hasPointerCapture(pointerId)) return;
@@ -224,6 +283,43 @@ export class CanvasComponent {
     addDragEventListeners(target, pointerId, moveCallback, cleanup);
   }
 
+  private _editCard(cardId: string) {
+    const target = this.$root.querySelector(`[data-content-id='${cardId}'`);
+    if (!target || target.classList.contains("editing")) {
+      return;
+    }
+
+    const textbox = target.querySelector(".card-text") as HTMLTextAreaElement;
+    const preview = target.querySelector(".card-text-rendered") as HTMLDivElement;
+
+    preview.style.display = "none";
+    textbox.style.display = "block";
+
+    autosize.update(textbox);
+
+    textbox.disabled = false;
+    textbox.focus();
+
+    target.classList.add("editing");
+
+    textbox.addEventListener(
+      "blur",
+      () => {
+        console.log(`saving content: ${cardId}`);
+        this.store.updateBlockContent(cardId, textbox.value as string);
+
+        this._deselect(cardId);
+
+        textbox.disabled = true;
+        target.classList.remove("editing", "selected");
+
+        preview.style.display = "block";
+        textbox.style.display = "none";
+      },
+      { once: true }
+    );
+  }
+
   private _doubleClickHandler(evt: MouseEvent): void {
     console.log(evt);
     const target = evt.target;
@@ -238,42 +334,7 @@ export class CanvasComponent {
       });
     } else if (this._isCardContainer(target)) {
       console.log("double clicked card");
-
-      // ignore events if we are already editing
-      if (target.classList.contains("editing")) {
-        return;
-      }
-
-      const textbox = target.querySelector(".card-text") as HTMLTextAreaElement;
-      const preview = target.querySelector(".card-text-rendered") as HTMLDivElement;
-
-      preview.style.display = "none";
-      textbox.style.display = "block";
-      textbox.disabled = false;
-
-      autosize.update(textbox);
-      textbox.focus();
-
-      target.classList.add("editing");
-
-      textbox.addEventListener("blur", () => {
-        console.log(`saving content: ${target.dataset.contentId}`);
-        this.store.updateBlockContent(
-          target.dataset.contentId as string,
-          textbox.value as string
-        );
-      });
-
-      target.addEventListener(
-        "focusout",
-        () => {
-          textbox.disabled = true;
-          target.classList.remove("editing");
-          preview.style.display = "block";
-          textbox.style.display = "none";
-        },
-        { once: true }
-      );
+      this._editCard(target.dataset.contentId as string);
     }
   }
 }
