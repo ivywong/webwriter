@@ -11,6 +11,7 @@ const MarkdownIt = markdownit();
 const cardContainerClass = "card-container";
 
 type CardCornerAction = "resize" | "link" | "stack" | "delete";
+type CardMenuAction = "add" | "color" | "lock" | "delete";
 
 export class CanvasComponent {
   $root: HTMLDivElement;
@@ -47,6 +48,14 @@ export class CanvasComponent {
 
   _isCardCorner(action: CardCornerAction, value: unknown): value is HTMLDivElement {
     return value instanceof HTMLDivElement && value.dataset.action === action;
+  }
+
+  _isCardMenuAction(action: CardMenuAction, value: unknown): value is HTMLButtonElement {
+    return (
+      value instanceof HTMLButtonElement &&
+      value.classList.contains("card-action-button") &&
+      value.dataset.action === action
+    );
   }
 
   _setupHotkeys() {
@@ -209,9 +218,13 @@ export class CanvasComponent {
       this._handleCardContainerPointerDown(target, evt);
     } else if (this._isCardCorner("resize", target)) {
       this._resizeHandler(target, evt);
-    } else if (this._isCardCorner("delete", target)) {
-      if (target.parentElement?.dataset.contentId) {
-        this.store.deleteCard(target.parentElement.dataset.contentId);
+    } else if (
+      this._isCardCorner("delete", target) ||
+      this._isCardMenuAction("delete", target)
+    ) {
+      const card = target.closest(".card-container") as HTMLDivElement;
+      if (card.dataset.contentId) {
+        this.store.deleteCard(card.dataset.contentId);
       }
     } else if (target === this.$root) {
       this._deselectAll();
