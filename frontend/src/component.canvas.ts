@@ -9,7 +9,6 @@ import hotkeys from "hotkeys-js";
 const MarkdownIt = markdownit();
 
 const cardContainerClass = "card-container";
-const cardCornerClass = "card-corner";
 
 type CardCornerAction = "resize" | "link" | "stack" | "delete";
 
@@ -23,6 +22,7 @@ export class CanvasComponent {
     this.$root = $root;
     this.store = store;
     this.selectedCardIds = [];
+
     this.maxZIndex =
       Math.max(...this.store.currentSpace.cards.map((c) => c.position.z)) + 1;
     console.log(this.maxZIndex);
@@ -52,6 +52,7 @@ export class CanvasComponent {
   _setupHotkeys() {
     hotkeys("ctrl+z, command+z", { scope: "canvas" }, () => {
       console.log("undo canvas state");
+      this.store.undo();
     });
 
     hotkeys(
@@ -59,6 +60,7 @@ export class CanvasComponent {
       { scope: "canvas" },
       () => {
         console.log("redo canvas state");
+        this.store.redo();
       }
     );
 
@@ -114,6 +116,9 @@ export class CanvasComponent {
 
     this.store.addEventListener("updateBlock", (evt: CustomEventInit) => {
       this.renderUpdatedText(evt.detail);
+    });
+    this.store.addEventListener("save", () => {
+      this.renderAll();
     });
   }
 

@@ -1,11 +1,15 @@
 import { deepEquals } from "./helper";
+import { CanvasHistory } from "./history";
 import { Space, Block, CanvasData, CardView, ContainerPosition } from "./model";
 
 export default class WebwriterLocalStore extends EventTarget {
   localStorageKey: string;
+
   #spaces: Space[] = [new Space()];
   spaceId: string = this.#spaces[0].id;
   #blocks: Block[] = [];
+
+  history: CanvasHistory;
 
   constructor(localStorageKey: string) {
     super();
@@ -21,6 +25,8 @@ export default class WebwriterLocalStore extends EventTarget {
       },
       false
     );
+
+    this.history = new CanvasHistory(structuredClone(this.canvasData));
   }
   _resetStore() {
     this._setSpaces([new Space()]);
@@ -60,6 +66,12 @@ export default class WebwriterLocalStore extends EventTarget {
     return new CanvasData(this.#spaces, this.#blocks);
   }
 
+  set canvasData(data: CanvasData) {
+    this._setSpaces(data.spaces);
+    this._setBlocks(data.blocks);
+    this._save();
+  }
+
   get currentSpace() {
     return this.#spaces[0];
   }
@@ -90,6 +102,7 @@ export default class WebwriterLocalStore extends EventTarget {
     if (block) {
       block.content = content;
       this._save("updateBlock", block);
+      this.history.add(structuredClone(this.canvasData));
     }
   }
 
@@ -109,6 +122,7 @@ export default class WebwriterLocalStore extends EventTarget {
     this.currentSpace.cards.push(card);
 
     this._save("addCard", card);
+    this.history.add(structuredClone(this.canvasData));
   }
 
   updateCardPosition(cardId: string, position: Partial<ContainerPosition>) {
@@ -123,6 +137,7 @@ export default class WebwriterLocalStore extends EventTarget {
 
       card.position = mergedPosition;
       this._save("updateCardPosition", card);
+      this.history.add(structuredClone(this.canvasData));
       console.log(`saved card ${cardId} position`, card.position);
     } else {
       console.error(`${cardId} not found!`);
@@ -135,5 +150,20 @@ export default class WebwriterLocalStore extends EventTarget {
       (c) => c.contentId !== contentId
     );
     this._save("deleteCard", contentId);
+    this.history.add(structuredClone(this.canvasData));
+  }
+
+  undo() {
+    if (this.history.prevState) {
+      this.canvasData = structuredClone(this.history.prevState);
+      this.history.undo();
+    }
+  }
+
+  redo() {
+    if (this.history.nextState) {
+      this.canvasData = structuredClone(this.history.nextState);
+      this.history.redo();
+    }
   }
 }
