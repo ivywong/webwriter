@@ -1,36 +1,32 @@
 import { deepEquals } from "./helper";
 import { CanvasHistory } from "./history";
-import { Space, Block, CanvasData, CardView, ContainerPosition } from "./model";
+import { Space, Block, AppData, CardView, ContainerPosition } from "./model";
 
 export default class WebwriterLocalStore extends EventTarget {
   localStorageKey: string;
 
-  #spaces: Space[] = [new Space()];
-  spaceId: string = this.#spaces[0].id;
-  #blocks: Block[] = [];
-
+  data: AppData;
   history: CanvasHistory;
 
   constructor(localStorageKey: string) {
     super();
     this.localStorageKey = localStorageKey;
+    this.data = new AppData([], [], "");
     this._readStorage();
 
     window.addEventListener(
       "storage",
       () => {
-        // TODO: handle multiple tabs
         this._readStorage();
         this._save();
       },
       false
     );
 
-    this.history = new CanvasHistory(structuredClone(this.canvasData));
+    this.history = new CanvasHistory(structuredClone(this.data));
   }
   _resetStore() {
-    this._setSpaces([new Space()]);
-    this._setBlocks([]);
+    this.data = new AppData([], [], "");
     window.localStorage.removeItem(this.localStorageKey);
     this._save();
   }
@@ -47,54 +43,87 @@ export default class WebwriterLocalStore extends EventTarget {
       const parsed = JSON.parse(json);
       if (parsed) {
         console.log(`parsed local storage JSON: `, parsed);
-        const canvasData = CanvasData.deserialize(parsed);
-        this._setSpaces(canvasData.spaces);
-        this._setBlocks(canvasData.blocks);
+        const data = AppData.deserialize(parsed);
+        this.data = data;
       }
     } catch (err) {
       console.error("Failed to read data from local storage: ", err);
     }
   }
   _save(event?: string, data?: unknown) {
-    window.localStorage.setItem(this.localStorageKey, JSON.stringify(this.canvasData));
+    window.localStorage.setItem(this.localStorageKey, JSON.stringify(this.data));
     this.dispatchEvent(
       new CustomEvent(event ? event : "save", data ? { detail: data } : undefined)
     );
   }
 
-  get canvasData() {
-    return new CanvasData(this.#spaces, this.#blocks);
+  get currentSpaceId() {
+    return this.data.currentSpaceId;
   }
 
-  set canvasData(data: CanvasData) {
-    this._setSpaces(data.spaces);
-    this._setBlocks(data.blocks);
-    this._save();
+  set currentSpaceId(spaceId: string) {
+    this.data.currentSpaceId = spaceId;
+  }
+
+  get blocks() {
+    return this.data.blocks;
+  }
+
+  set blocks(blocks: Block[]) {
+    this.data.blocks = blocks;
+  }
+
+  get spaces() {
+    return this.data.spaces;
+  }
+
+  set spaces(spaces: Space[]) {
+    this.data.spaces = spaces;
   }
 
   get currentSpace() {
-    return this.#spaces[0];
+    return this.getSpace(this.currentSpaceId);
   }
 
-  _setSpaces(spaces: Space[]) {
-    this.#spaces = spaces;
-    if (this.#spaces.length > 0) {
-      this.spaceId = this.#spaces[0].id;
+  getSpace(id: string) {
+    const space = this.spaces.find((s) => s.id === id);
+    if (space) {
+      return space;
+    }
+    throw new Error(`Space '${id}' is invalid!`);
+  }
+
+  addSpace(name?: string) {
+    const space = new Space(name);
+    this.spaces.push(space);
+    this._save("addSpace", space);
+  }
+
+  switchToSpace(id: string) {
+    if (this.spaces.filter((s) => s.id === id).length === 1) {
+      this.currentSpaceId = id;
+      this._save("switchSpace", id);
+    } else {
+      throw new Error(`Error getting space with id: '${id}'`);
     }
   }
 
-  _setBlocks(blocks: Block[]) {
-    this.#blocks = blocks;
+  deleteSpace(id: string) {
+    this.spaces = this.spaces.filter((b) => b.id !== id);
   }
 
   addBlock() {
-    const block = new Block(this.spaceId);
-    this.#blocks.push(block);
+    const block = new Block(this.currentSpaceId);
+    this.blocks.push(block);
     this._save("addBlock", block);
   }
 
   getBlock(id: string) {
-    return this.#blocks.find((b) => b.id === id);
+    return this.blocks.find((b) => b.id === id);
+  }
+
+  deleteBlock(id: string) {
+    this.blocks = this.blocks.filter((b) => b.id !== id);
   }
 
   updateBlockContent(id: string, content: string) {
@@ -102,17 +131,17 @@ export default class WebwriterLocalStore extends EventTarget {
     if (block) {
       block.content = content;
       this._save("updateBlock", block);
-      this.history.add(structuredClone(this.canvasData));
+      this.history.add(structuredClone(this.data));
     }
   }
 
-  getCardById(id: string) {
+  getCard(id: string) {
     return this.currentSpace.cards.find((c) => c.contentId === id);
   }
 
   addCard(position: ContainerPosition) {
-    const block = new Block(this.spaceId);
-    this.#blocks.push(block);
+    const block = new Block(this.currentSpaceId);
+    this.blocks.push(block);
 
     const card: CardView = {
       contentId: block.id,
@@ -122,11 +151,11 @@ export default class WebwriterLocalStore extends EventTarget {
     this.currentSpace.cards.push(card);
 
     this._save("addCard", card);
-    this.history.add(structuredClone(this.canvasData));
+    this.history.add(structuredClone(this.data));
   }
 
   updateCardPosition(cardId: string, position: Partial<ContainerPosition>) {
-    const card = this.getCardById(cardId);
+    const card = this.getCard(cardId);
     if (card) {
       const mergedPosition = { ...card.position, ...position };
 
@@ -137,7 +166,7 @@ export default class WebwriterLocalStore extends EventTarget {
 
       card.position = mergedPosition;
       this._save("updateCardPosition", card);
-      this.history.add(structuredClone(this.canvasData));
+      this.history.add(structuredClone(this.data));
       console.log(`saved card ${cardId} position`, card.position);
     } else {
       console.error(`${cardId} not found!`);
@@ -145,24 +174,24 @@ export default class WebwriterLocalStore extends EventTarget {
   }
 
   deleteCard(contentId: string) {
-    this._setBlocks(this.#blocks.filter((b) => b.id !== contentId));
+    this.deleteBlock(contentId);
     this.currentSpace.cards = this.currentSpace.cards.filter(
       (c) => c.contentId !== contentId
     );
     this._save("deleteCard", contentId);
-    this.history.add(structuredClone(this.canvasData));
+    this.history.add(structuredClone(this.data));
   }
 
   undo() {
     if (this.history.prevState) {
-      this.canvasData = structuredClone(this.history.prevState);
+      this.data = structuredClone(this.history.prevState);
       this.history.undo();
     }
   }
 
   redo() {
     if (this.history.nextState) {
-      this.canvasData = structuredClone(this.history.nextState);
+      this.data = structuredClone(this.history.nextState);
       this.history.redo();
     }
   }

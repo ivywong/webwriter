@@ -1,6 +1,6 @@
-import { CanvasData } from "./model";
+import { AppData } from "./model";
 
-type State = CanvasData;
+type State = AppData;
 
 export class CanvasHistory {
   undos: State[];

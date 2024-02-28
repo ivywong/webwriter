@@ -20,24 +20,43 @@ export interface Serializable<T> {
   deserialize(obj: Object): T;
 }
 
-export class CanvasData {
+// TODO: rename?
+export class AppData {
   spaces: Space[];
   blocks: Block[];
+  currentSpaceId: string;
 
-  constructor(spaces: Space[] = [], blocks: Block[] = []) {
+  constructor(
+    spaces: Space[] = [],
+    blocks: Block[] = [],
+    currentSpaceId: string | undefined
+  ) {
     this.spaces = spaces;
     this.blocks = blocks;
+
+    if (currentSpaceId) {
+      this.currentSpaceId = currentSpaceId;
+      return;
+    }
+
+    if (this.spaces.length === 0) {
+      this.spaces.push(new Space());
+    }
+
+    this.currentSpaceId = this.spaces[0].id;
   }
 
-  static deserialize(obj: any): CanvasData {
-    const data = new CanvasData();
-    data.spaces = obj.spaces.map((s: any) => {
+  static deserialize(obj: any): AppData {
+    const spaces = obj.spaces.map((s: any) => {
       return Space.deserialize(s);
     });
-    data.blocks = obj.blocks.map((b: any) => {
+    const blocks = obj.blocks.map((b: any) => {
       return Block.deserialize(b);
     });
-    return data;
+    // TODO: null check?
+    const currentSpaceId = obj.currentSpaceId;
+
+    return new AppData(spaces, blocks, currentSpaceId);
   }
 }
 
@@ -73,13 +92,15 @@ export class Block {
 
 export class Stack {
   id: string;
+  title: string;
   position: ContainerPosition;
   blockIds: string[];
   isLocked = false;
   isCollapsed = false;
 
-  constructor(position: ContainerPosition, blockIds: string[] = []) {
+  constructor(position: ContainerPosition, blockIds: string[] = [], title?: string) {
     this.id = `stack-${crypto.randomUUID()}`;
+    this.title = title ?? "Untitled Stack";
     this.position = position;
     this.blockIds = blockIds;
   }
@@ -101,17 +122,20 @@ export class Stack {
 
 export class Space {
   id: string;
+  name: string = "Untitled";
   stacks: Stack[] = [];
   cards: CardView[] = [];
   links: Link[] = [];
 
-  constructor() {
+  constructor(name: string = "Untitled") {
     this.id = `space-${crypto.randomUUID()}`;
+    this.name = name;
   }
 
   static deserialize(obj: any) {
     const s = new Space();
     s.id = obj.id;
+    s.name = obj.name;
     s.stacks = obj.stacks.map((s: any) => {
       Stack.deserialize(s);
     });

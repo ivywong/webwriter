@@ -22,11 +22,11 @@ export class AppComponent {
 
     this.reset.addEventListener("click", (evt: MouseEvent) => {
       this.store._resetStore();
-      console.log("reset store data: ", this.store.canvasData);
+      console.log("reset store data: ", this.store.data);
     });
   }
   render() {
     console.log("rerendering!");
-    console.log("store data: ", this.store.canvasData);
+    console.log("store data: ", this.store.data);
   }
 }
