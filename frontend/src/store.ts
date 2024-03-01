@@ -108,6 +108,11 @@ export default class WebwriterLocalStore extends EventTarget {
     }
   }
 
+  renameSpace(id: string, name: string) {
+    this.getSpace(id).name = name;
+    this._save();
+  }
+
   deleteSpace(id: string) {
     this.spaces = this.spaces.filter((b) => b.id !== id);
   }
