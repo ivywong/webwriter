@@ -191,6 +191,7 @@ export default class WebwriterLocalStore extends EventTarget {
     if (this.history.prevState) {
       this.data = structuredClone(this.history.prevState);
       this.history.undo();
+      this._save();
     }
   }
 
@@ -198,6 +199,7 @@ export default class WebwriterLocalStore extends EventTarget {
     if (this.history.nextState) {
       this.data = structuredClone(this.history.nextState);
       this.history.redo();
+      this._save();
     }
   }
 }
