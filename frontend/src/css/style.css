@@ -68,7 +68,12 @@ button:focus {
   /* justify-content: space-between; */
   align-items: center;
 
-  max-width: 300px;
+  min-width: 200px;
+  position: absolute;
+  top: 5%;
+  left: 50%;
+  transform: translate(-50%, 0%);
+  z-index: 9999999;
 }
 
 #space-header::marker {
