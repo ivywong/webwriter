@@ -1,7 +1,7 @@
 import WebwriterLocalStore from "./store";
 
 export class AppComponent {
-  $root: HTMLDivElement;
+  app: HTMLDivElement;
   canvas: HTMLDivElement;
   store: WebwriterLocalStore;
 
@@ -14,8 +14,11 @@ export class AppComponent {
   exportSpaceButton: HTMLButtonElement;
   deleteSpaceButton: HTMLButtonElement;
 
+  spacePickerModal: HTMLDivElement;
+  spacePickerPopup: HTMLDivElement;
+
   constructor($root: Document, store: WebwriterLocalStore) {
-    this.$root = $root.querySelector("#app") as HTMLDivElement;
+    this.app = $root.querySelector("#app") as HTMLDivElement;
     this.canvas = $root.getElementById("canvas") as HTMLDivElement;
     this.reset = $root.getElementById("reset") as HTMLButtonElement;
     this.spaceToggle = $root.getElementById("space-header") as HTMLDetailsElement;
@@ -27,6 +30,9 @@ export class AppComponent {
     ) as HTMLButtonElement;
     this.exportSpaceButton = $root.getElementById("export-space") as HTMLButtonElement;
     this.deleteSpaceButton = $root.getElementById("delete-space") as HTMLButtonElement;
+
+    this.spacePickerModal = $root.getElementById("space-picker-modal") as HTMLDivElement;
+    this.spacePickerPopup = $root.getElementById("space-picker-popup") as HTMLDivElement;
 
     this.store = store;
 
@@ -42,8 +48,23 @@ export class AppComponent {
       console.log("reset store data: ", this.store.data);
     });
 
-    this.openSpaceSettingsButton.addEventListener("click", (evt: MouseEvent) => {
-      // open modal
+    this.switchSpaceButton.addEventListener("click", (evt: MouseEvent) => {
+      const spaceListEl = document.createElement("ul");
+      for (const space of this.store.spaces) {
+        const button = document.createElement("button");
+        button.textContent = space.name;
+        button.dataset.spaceId = space.id;
+        spaceListEl.appendChild(button);
+      }
+      this.spacePickerPopup.appendChild(spaceListEl);
+      this.spacePickerModal.style.display = "flex";
+    });
+
+    this.spacePickerModal.addEventListener("click", (evt: MouseEvent) => {
+      if (evt.target === this.spacePickerModal) {
+        this.spacePickerModal.style.display = "none";
+        this.spacePickerPopup.innerHTML = "";
+      }
     });
   }
   render() {
