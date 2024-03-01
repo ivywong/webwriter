@@ -102,7 +102,7 @@ export default class WebwriterLocalStore extends EventTarget {
   switchToSpace(id: string) {
     if (this.spaces.filter((s) => s.id === id).length === 1) {
       this.currentSpaceId = id;
-      this._save("switchSpace", id);
+      this._save();
     } else {
       throw new Error(`Error getting space with id: '${id}'`);
     }

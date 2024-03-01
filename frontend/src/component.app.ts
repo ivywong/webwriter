@@ -53,8 +53,12 @@ export class AppComponent {
       for (const space of this.store.spaces) {
         const button = document.createElement("button");
         button.textContent = space.name;
-        button.dataset.spaceId = space.id;
         spaceListEl.appendChild(button);
+
+        button.onclick = () => {
+          this.store.switchToSpace(space.id);
+          this.closeModal();
+        };
       }
       this.spacePickerPopup.appendChild(spaceListEl);
       this.spacePickerModal.style.display = "flex";
@@ -62,8 +66,7 @@ export class AppComponent {
 
     this.spacePickerModal.addEventListener("click", (evt: MouseEvent) => {
       if (evt.target === this.spacePickerModal) {
-        this.spacePickerModal.style.display = "none";
-        this.spacePickerPopup.innerHTML = "";
+        this.closeModal();
       }
     });
   }
@@ -72,5 +75,10 @@ export class AppComponent {
     console.log("store data: ", this.store.data);
 
     this.spaceTitle.textContent = this.store.currentSpace.name;
+  }
+
+  closeModal() {
+    this.spacePickerModal.style.display = "none";
+    this.spacePickerPopup.innerHTML = "";
   }
 }
