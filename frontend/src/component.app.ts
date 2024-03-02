@@ -43,18 +43,18 @@ export class AppComponent {
   _bindEvents() {
     this.store.addEventListener("save", this.render.bind(this));
 
-    this.reset.addEventListener("click", (evt: MouseEvent) => {
+    this.reset.onclick = () => {
       this.store._resetStore();
       console.log("reset store data: ", this.store.data);
-    });
+    };
 
     this.deleteSpaceButton.onclick = () => {
       // TODO: add confirmation modal
       this.store.deleteSpace(this.store.currentSpaceId);
-      this.spaceToggle.removeAttribute("open");
+      this.closeMenu();
     };
 
-    this.switchSpaceButton.addEventListener("click", (evt: MouseEvent) => {
+    this.switchSpaceButton.onclick = () => {
       const popupTemplate = document.getElementById(
         "space-picker-template"
       ) as HTMLTemplateElement;
@@ -71,14 +71,15 @@ export class AppComponent {
         "create-space-button"
       ) as HTMLButtonElement;
 
-      createSpaceButton.addEventListener("click", (evt: MouseEvent) => {
+      createSpaceButton.onclick = () => {
         if (input.value !== "") {
           const space = this.store.addSpace(input.value);
           input.value = "";
           this.store.switchToSpace(space.id);
           this.closeModal();
+          this.closeMenu();
         }
-      });
+      };
 
       const spaceListEl = this.spacePickerPopup.getElementsByTagName(
         "ul"
@@ -92,22 +93,27 @@ export class AppComponent {
         button.onclick = () => {
           this.store.switchToSpace(space.id);
           this.closeModal();
+          this.closeMenu();
         };
       }
       this.spacePickerModal.style.display = "flex";
-    });
+    };
 
-    this.spacePickerModal.addEventListener("click", (evt: MouseEvent) => {
+    this.spacePickerModal.onclick = (evt: MouseEvent) => {
       if (evt.target === this.spacePickerModal) {
         this.closeModal();
       }
-    });
+    };
   }
   render() {
     console.log("rerendering!");
     console.log("store data: ", this.store.data);
 
     this.spaceTitle.textContent = this.store.currentSpace.name;
+  }
+
+  closeMenu() {
+    this.spaceToggle.removeAttribute("open");
   }
 
   closeModal() {
