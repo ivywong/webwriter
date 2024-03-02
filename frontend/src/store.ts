@@ -116,6 +116,15 @@ export default class WebwriterLocalStore extends EventTarget {
 
   deleteSpace(id: string) {
     this.spaces = this.spaces.filter((b) => b.id !== id);
+    if (this.currentSpaceId === id) {
+      if (this.spaces.length === 0) {
+        const space = this.addSpace();
+        this.switchToSpace(space.id);
+      } else {
+        this.switchToSpace(this.spaces[0].id);
+      }
+    }
+    this._save();
   }
 
   addBlock() {

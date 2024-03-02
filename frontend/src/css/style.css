@@ -148,6 +148,15 @@ button:focus {
   gap: 2px;
 }
 
+#delete-space {
+  color: red;
+}
+
+#delete-space:hover {
+  background-color: red;
+  color: white;
+}
+
 .staggered :nth-child(odd) {
   transform: rotate(1deg);
 }

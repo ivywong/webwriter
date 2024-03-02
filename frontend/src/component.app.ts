@@ -48,6 +48,12 @@ export class AppComponent {
       console.log("reset store data: ", this.store.data);
     });
 
+    this.deleteSpaceButton.onclick = () => {
+      // TODO: add confirmation modal
+      this.store.deleteSpace(this.store.currentSpaceId);
+      this.spaceToggle.removeAttribute("open");
+    };
+
     this.switchSpaceButton.addEventListener("click", (evt: MouseEvent) => {
       const popupTemplate = document.getElementById(
         "space-picker-template"
