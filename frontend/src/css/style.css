@@ -48,6 +48,7 @@ svg {
 button {
   background-color: white;
   border: 1px solid var(--highlight-color);
+  min-width: 30px;
 }
 
 button:hover {
@@ -61,6 +62,8 @@ button:focus {
 }
 
 #space-picker-modal {
+  font-family: var(--font-family-ui);
+  font-size: 1.2rem;
   position: absolute;
   width: 100vw;
   height: 100vh;
@@ -75,7 +78,7 @@ button:focus {
   background-color: white;
   border: 1px solid var(--highlight-color);
   min-width: 300px;
-  padding: 10px;
+  padding: 15px;
   display: flex;
   flex-direction: column;
 }
@@ -84,6 +87,23 @@ button:focus {
   padding: 0;
   display: flex;
   flex-direction: column;
+  margin-block-end: 0;
+  gap: 5px;
+}
+
+#space-picker-input-wrapper {
+  display: flex;
+  flex-direction: row;
+  margin-block-end: 10px;
+  justify-content: space-between;
+}
+
+#space-picker-input-wrapper > input {
+  width: 100%;
+}
+
+#space-picker-popup ul * {
+  /* border: none; */
 }
 
 #space-header {
@@ -128,11 +148,11 @@ button:focus {
   gap: 2px;
 }
 
-#space-menu :nth-child(odd) {
+.staggered :nth-child(odd) {
   transform: rotate(1deg);
 }
 
-#space-menu :nth-child(even) {
+.staggered :nth-child(even) {
   transform: rotate(-1deg);
 }
 

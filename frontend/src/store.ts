@@ -97,6 +97,7 @@ export default class WebwriterLocalStore extends EventTarget {
     const space = new Space(name);
     this.spaces.push(space);
     this._save("addSpace", space);
+    return space;
   }
 
   switchToSpace(id: string) {

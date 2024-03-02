@@ -38,6 +38,20 @@
         </symbol>
       </defs>
     </svg>
+    <template id="space-picker-template">
+      <label for="space-picker">Search or Add Space...</label>
+      <div id="space-picker-input-wrapper">
+        <input
+          type="text"
+          name="space-picker"
+          id="space-picker-input"
+          placeholder="Search for Series..."
+          autofocus
+        />
+        <button id="create-space-button">+</button>
+      </div>
+      <ul class="staggered"></ul>
+    </template>
     <template id="card-template">
       <div class="card-container">
         <div class="card-corner" data-action="resize"></div>
@@ -85,7 +99,7 @@
       <details id="space-header">
         <summary id="space-title">Untitled Space</summary>
         <!-- 	up: &#9650; down: &#9660; right: &#9654; -->
-        <ul id="space-menu">
+        <ul id="space-menu" class="staggered">
           <button id="switch-space">Switch to Space...</button>
           <button id="space-settings">Space Settings</button>
           <button id="export-space">Export...</button>

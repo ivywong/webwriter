@@ -49,7 +49,35 @@ export class AppComponent {
     });
 
     this.switchSpaceButton.addEventListener("click", (evt: MouseEvent) => {
-      const spaceListEl = document.createElement("ul");
+      const popupTemplate = document.getElementById(
+        "space-picker-template"
+      ) as HTMLTemplateElement;
+
+      const cloned = popupTemplate.content.cloneNode(true);
+      this.spacePickerPopup.appendChild(cloned);
+
+      const input = document.getElementById("space-picker-input") as HTMLInputElement;
+      input?.addEventListener("input", () => {
+        console.log(input.value);
+      });
+
+      const createSpaceButton = document.getElementById(
+        "create-space-button"
+      ) as HTMLButtonElement;
+
+      createSpaceButton.addEventListener("click", (evt: MouseEvent) => {
+        if (input.value !== "") {
+          const space = this.store.addSpace(input.value);
+          input.value = "";
+          this.store.switchToSpace(space.id);
+          this.closeModal();
+        }
+      });
+
+      const spaceListEl = this.spacePickerPopup.getElementsByTagName(
+        "ul"
+      )[0] as HTMLUListElement;
+
       for (const space of this.store.spaces) {
         const button = document.createElement("button");
         button.textContent = space.name;
@@ -60,7 +88,6 @@ export class AppComponent {
           this.closeModal();
         };
       }
-      this.spacePickerPopup.appendChild(spaceListEl);
       this.spacePickerModal.style.display = "flex";
     });
 
