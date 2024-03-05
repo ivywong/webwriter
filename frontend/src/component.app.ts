@@ -1,4 +1,6 @@
+import { Space } from "./model";
 import WebwriterLocalStore from "./store";
+import { debounce } from "ts-debounce";
 
 export class AppComponent {
   app: HTMLDivElement;
@@ -69,8 +71,19 @@ export class AppComponent {
       this.spacePickerPopup.appendChild(cloned);
 
       const input = document.getElementById("space-picker-input") as HTMLInputElement;
-      input?.addEventListener("input", () => {
-        console.log(input.value);
+      const debouncedInputHandler = debounce(
+        (evt: InputEvent) => {
+          const filteredSpaces = this.store.filterSpaces(
+            (evt.target as HTMLInputElement).value.trim()
+          );
+          const spacesListEl = this.spacePickerPopup.querySelector("ul") as HTMLElement;
+          spacesListEl.replaceChildren(...filteredSpaces.map(this.createSpaceButton));
+        },
+        50,
+        { isImmediate: true }
+      );
+      input?.addEventListener("input", function (evt) {
+        debouncedInputHandler(evt as InputEvent);
       });
 
       const createSpaceButton = document.getElementById(
@@ -92,15 +105,7 @@ export class AppComponent {
       )[0] as HTMLUListElement;
 
       for (const space of this.store.spaces) {
-        const button = document.createElement("button");
-        button.textContent = space.name;
-        spaceListEl.appendChild(button);
-
-        button.onclick = () => {
-          this.store.switchToSpace(space.id);
-          this.closeModal();
-          this.closeMenu();
-        };
+        spaceListEl.appendChild(this.createSpaceButton(space));
       }
       this.spacePickerModal.style.display = "flex";
     };
@@ -116,6 +121,17 @@ export class AppComponent {
     console.log("store data: ", this.store.data);
 
     this.spaceTitle.textContent = this.store.currentSpace.name;
+  }
+  createSpaceButton(space: Space) {
+    const button = document.createElement("button");
+    button.textContent = space.name;
+
+    button.onclick = () => {
+      this.store.switchToSpace(space.id);
+      this.closeModal();
+      this.closeMenu();
+    };
+    return button;
   }
 
   closeMenu() {

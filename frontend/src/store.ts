@@ -93,6 +93,12 @@ export default class WebwriterLocalStore extends EventTarget {
     throw new Error(`Space '${id}' is invalid!`);
   }
 
+  filterSpaces(query: string) {
+    return this.spaces.filter((s) => {
+      return s.name.toLowerCase().includes(query.toLowerCase());
+    });
+  }
+
   addSpace(name?: string) {
     const space = new Space(name);
     this.spaces.push(space);
