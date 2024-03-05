@@ -73,6 +73,15 @@ export class CanvasComponent {
       }
     );
 
+    hotkeys("ctrl+c, command+c", { scope: "canvas" }, () => {
+      if (this.selectedCardIds.length === 1) {
+        const content = this.store.getBlock(this.selectedCardIds[0])?.content as string;
+        navigator.clipboard.writeText(content).then(() => {
+          console.log("copied to clipboard");
+        });
+      }
+    });
+
     hotkeys("delete, backspace", { scope: "canvas" }, () => {
       const cardToDelete = this.lastSelectedCardId;
       if (cardToDelete) {

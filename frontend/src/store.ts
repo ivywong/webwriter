@@ -160,8 +160,11 @@ export default class WebwriterLocalStore extends EventTarget {
     return this.currentSpace.cards.find((c) => c.contentId === id);
   }
 
-  addCard(position: ContainerPosition) {
+  addCard(position: ContainerPosition, content?: string) {
     const block = new Block(this.currentSpaceId);
+    if (content) {
+      block.content = content;
+    }
     this.blocks.push(block);
 
     const card: CardView = {
@@ -173,6 +176,7 @@ export default class WebwriterLocalStore extends EventTarget {
 
     this._save("addCard", card);
     this.history.add(structuredClone(this.data));
+    return card;
   }
 
   updateCardPosition(cardId: string, position: Partial<ContainerPosition>) {
