@@ -82,6 +82,14 @@ export class CanvasComponent {
       }
     });
 
+    // this is borked in firefox, works in chrome
+    hotkeys("ctrl+v, command+v", { scope: "canvas" }, () => {
+      navigator.clipboard.readText().then((copied: string) => {
+        console.log(`Pasted: ${copied}`);
+        this.store.addCard({ x: 100, y: 100, z: this.maxZIndex, w: -1 }, copied);
+      });
+    });
+
     hotkeys("delete, backspace", { scope: "canvas" }, () => {
       const cardToDelete = this.lastSelectedCardId;
       if (cardToDelete) {
