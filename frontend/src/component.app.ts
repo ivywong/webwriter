@@ -41,6 +41,12 @@ export class AppComponent {
   }
 
   _bindEvents() {
+    this.app.onclick = (evt: MouseEvent) => {
+      const isChild = this.spaceToggle.contains(evt.target as Node);
+      if (!isChild && this.spaceToggle.hasAttribute("open")) {
+        this.closeMenu();
+      }
+    };
     this.store.addEventListener("save", this.render.bind(this));
 
     this.reset.onclick = () => {
