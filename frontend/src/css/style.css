@@ -61,7 +61,7 @@ button:focus {
   color: white;
 }
 
-#space-picker-modal {
+#modal {
   font-family: var(--font-family-ui);
   font-size: 1.2rem;
   position: absolute;
@@ -74,7 +74,7 @@ button:focus {
   z-index: 999999999;
 }
 
-#space-picker-popup {
+#popup {
   background-color: white;
   border: 1px solid var(--highlight-color);
   min-width: 300px;
@@ -83,7 +83,7 @@ button:focus {
   flex-direction: column;
 }
 
-#space-picker-popup ul {
+#popup ul {
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -100,10 +100,6 @@ button:focus {
 
 #space-picker-input-wrapper > input {
   width: 100%;
-}
-
-#space-picker-popup ul * {
-  /* border: none; */
 }
 
 #space-header {

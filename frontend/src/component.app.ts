@@ -16,8 +16,8 @@ export class AppComponent {
   exportSpaceButton: HTMLButtonElement;
   deleteSpaceButton: HTMLButtonElement;
 
-  spacePickerModal: HTMLDivElement;
-  spacePickerPopup: HTMLDivElement;
+  modal: HTMLDivElement;
+  popup: HTMLDivElement;
 
   constructor($root: Document, store: WebwriterLocalStore) {
     this.app = $root.querySelector("#app") as HTMLDivElement;
@@ -33,8 +33,8 @@ export class AppComponent {
     this.exportSpaceButton = $root.getElementById("export-space") as HTMLButtonElement;
     this.deleteSpaceButton = $root.getElementById("delete-space") as HTMLButtonElement;
 
-    this.spacePickerModal = $root.getElementById("space-picker-modal") as HTMLDivElement;
-    this.spacePickerPopup = $root.getElementById("space-picker-popup") as HTMLDivElement;
+    this.modal = $root.getElementById("modal") as HTMLDivElement;
+    this.popup = $root.getElementById("popup") as HTMLDivElement;
 
     this.store = store;
 
@@ -68,7 +68,7 @@ export class AppComponent {
       ) as HTMLTemplateElement;
 
       const cloned = popupTemplate.content.cloneNode(true);
-      this.spacePickerPopup.appendChild(cloned);
+      this.popup.appendChild(cloned);
 
       const input = document.getElementById("space-picker-input") as HTMLInputElement;
       const debouncedInputHandler = debounce(
@@ -76,7 +76,7 @@ export class AppComponent {
           const filteredSpaces = this.store.filterSpaces(
             (evt.target as HTMLInputElement).value.trim()
           );
-          const spacesListEl = this.spacePickerPopup.querySelector("ul") as HTMLElement;
+          const spacesListEl = this.popup.querySelector("ul") as HTMLElement;
           spacesListEl.replaceChildren(...filteredSpaces.map(this.createSpaceButton));
         },
         50,
@@ -100,18 +100,16 @@ export class AppComponent {
         }
       };
 
-      const spaceListEl = this.spacePickerPopup.getElementsByTagName(
-        "ul"
-      )[0] as HTMLUListElement;
+      const spaceListEl = this.popup.getElementsByTagName("ul")[0] as HTMLUListElement;
 
       for (const space of this.store.spaces) {
         spaceListEl.appendChild(this.createSpaceButton(space));
       }
-      this.spacePickerModal.style.display = "flex";
+      this.modal.style.display = "flex";
     };
 
-    this.spacePickerModal.onclick = (evt: MouseEvent) => {
-      if (evt.target === this.spacePickerModal) {
+    this.modal.onclick = (evt: MouseEvent) => {
+      if (evt.target === this.modal) {
         this.closeModal();
       }
     };
@@ -139,7 +137,7 @@ export class AppComponent {
   }
 
   closeModal() {
-    this.spacePickerModal.style.display = "none";
-    this.spacePickerPopup.innerHTML = "";
+    this.modal.style.display = "none";
+    this.popup.innerHTML = "";
   }
 }
