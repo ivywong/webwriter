@@ -92,26 +92,29 @@ button:focus {
   height: 100vh;
   display: none;
   justify-content: center;
-  align-items: center;
   background-color: rgba(0, 0, 0, 50%);
   z-index: 999999999;
 }
 
 #popup {
+  top: 30%;
+  position: fixed;
   background-color: white;
   border: 1px solid var(--highlight-color);
-  min-width: 300px;
+  min-width: 25%;
+  max-height: 40%;
   padding: 15px;
   display: flex;
   flex-direction: column;
 }
 
 #popup ul {
-  padding: 0;
+  padding: 10px 5px;
   display: flex;
   flex-direction: column;
   margin-block-end: 0;
   gap: 5px;
+  overflow-y: scroll;
 }
 
 #space-picker-input-wrapper {
