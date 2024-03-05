@@ -1,18 +1,32 @@
 :root {
   --font-family: "IBM Plex Sans", Arial, Helvetica, sans-serif;
   --font-family-ui: "Alegreya Sans SC", Helvetica, sans-serif;
-  background-color: hsl(48, 100%, 93%);
-  --highlight-color: hsl(8, 42%, 44%);
+  --background-color: hsl(45, 55%, 96%);
+  --highlight-color: hsl(8, 81%, 46%);
+  --neutral-color: hsl(8, 32%, 61%);
+  --neutral-color-gray: hsl(12, 3%, 70%);
   --shadow-color: 26deg 58% 67%;
   --font-color: black;
+
+  --button-hover-bg: var(--highlight-color);
+  --button-hover-color: white;
 }
 
 html,
 body {
   margin: 0;
   min-height: 100%;
+  background-color: var(--background-color);
   color: var(--font-color);
   font-family: var(--font-family);
+
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    var(--neutral-color) 1px,
+    transparent 0
+  );
+  background-size: 40px 40px;
+  background-position: 20px 20px;
 }
 
 h1,
@@ -30,6 +44,15 @@ blockquote {
   margin-inline-start: 0.5rem;
   border-inline-start: 5px solid hsl(247, 23%, 70%);
   padding-inline-start: 10px;
+}
+
+a {
+  color: var(--highlight-color);
+}
+
+a:hover,
+a:focus {
+  font-weight: bold;
 }
 
 #app,
@@ -52,8 +75,8 @@ button {
 }
 
 button:hover {
-  background-color: var(--highlight-color);
-  color: white;
+  background-color: var(--button-hover-bg);
+  color: var(--button-hover-color);
 }
 
 button:focus {
@@ -144,15 +167,6 @@ button:focus {
   gap: 2px;
 }
 
-#delete-space {
-  color: red;
-}
-
-#delete-space:hover {
-  background-color: red;
-  color: white;
-}
-
 .staggered :nth-child(odd) {
   transform: rotate(1deg);
 }
@@ -186,7 +200,7 @@ details[open] summary:after {
 .card-container {
   position: absolute;
   margin: 0;
-  min-width: 100px;
+  min-width: 200px;
   min-height: 30px;
   width: fit-content;
   height: fit-content;
@@ -219,7 +233,7 @@ details[open] summary:after {
   height: 30px;
   width: 30px;
   background-color: white;
-  border: 1px solid var(--highlight-color);
+  border: 1px solid var(--neutral-color-gray);
   text-align: center;
   /* border-radius: 50%; */
 }
@@ -228,22 +242,14 @@ details[open] summary:after {
   position: relative;
 }
 
-.card-action-button:hover {
-  background-color: var(--highlight-color);
-  color: white;
-}
-
-.card-action-button:focus {
-  background-color: black;
-  color: white;
-}
-
-.card-action-button[data-action="delete"] {
+.danger {
   border-color: red;
+  color: red;
 }
 
-.card-action-button[data-action="delete"]:hover {
+.danger:hover {
   background-color: red;
+  color: white;
 }
 
 .card-text {
@@ -274,7 +280,7 @@ details[open] summary:after {
 }
 
 .card-container:focus-within {
-  border: 2px double var(--highlight-color);
+  border: 3px double var(--highlight-color);
 }
 
 .card-container.editing .card-text {
@@ -292,7 +298,7 @@ details[open] summary:after {
   position: absolute;
   width: 10px;
   height: 10px;
-  border: 1px solid lightsalmon;
+  /* border: 1px solid lightsalmon; */
   border-radius: 50%;
 }
 
@@ -323,11 +329,6 @@ details[open] summary:after {
   border: none;
   color: red;
   font-weight: bold;
-}
-
-.card-corner:hover,
-.card-corner:focus {
-  border: 1px solid var(--highlight-color);
 }
 
 .grabbed {

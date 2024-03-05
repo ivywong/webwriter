@@ -61,30 +61,30 @@
         <div class="card-text-rendered"></div>
         <menu class="card-actions">
           <li>
+            <button class="card-action-button danger" data-action="delete">
+              <svg width="28" height="28" fill="currentColor" viewBox="0 0 256 256">
+                <use href="#icon-trash" />
+              </svg>
+            </button>
+          </li>
+          <li>
             <button class="card-action-button" data-action="add">
-              <svg width="28" height="28" fill="#000000" viewBox="0 0 256 256">
+              <svg width="28" height="28" fill="currentColor" viewBox="0 0 256 256">
                 <use href="#icon-add" />
               </svg>
             </button>
           </li>
           <li>
             <button class="card-action-button" data-action="color">
-              <svg width="28" height="28" fill="#000000" viewBox="0 0 256 256">
+              <svg width="28" height="28" fill="currentColor" viewBox="0 0 256 256">
                 <use href="#icon-palette" />
               </svg>
             </button>
           </li>
           <li>
             <button class="card-action-button" data-action="lock">
-              <svg width="28" height="28" fill="#000000" viewBox="0 0 256 256">
+              <svg width="28" height="28" fill="currentColor" viewBox="0 0 256 256">
                 <use href="#icon-unlocked" />
-              </svg>
-            </button>
-          </li>
-          <li>
-            <button class="card-action-button" data-action="delete">
-              <svg width="28" height="28" fill="#000000" viewBox="0 0 256 256">
-                <use href="#icon-trash" />
               </svg>
             </button>
           </li>
@@ -103,7 +103,7 @@
           <button id="switch-space">Switch to Space...</button>
           <button id="space-settings">Space Settings</button>
           <button id="export-space">Export...</button>
-          <button id="delete-space">Delete Space</button>
+          <button id="delete-space" class="danger">Delete Space</button>
         </ul>
       </details>
       <div id="canvas"></div>
