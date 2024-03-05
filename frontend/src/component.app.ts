@@ -105,7 +105,8 @@ export class AppComponent {
       for (const space of this.store.spaces) {
         spaceListEl.appendChild(this.createSpaceButton(space));
       }
-      this.modal.style.display = "flex";
+
+      this.openModal();
     };
 
     this.modal.onclick = (evt: MouseEvent) => {
@@ -136,8 +137,14 @@ export class AppComponent {
     this.spaceToggle.removeAttribute("open");
   }
 
+  openModal() {
+    this.modal.style.display = "flex";
+    document.body.style.overflow = "hidden";
+  }
+
   closeModal() {
     this.modal.style.display = "none";
+    document.body.style.overflow = "unset";
     this.popup.innerHTML = "";
   }
 }
