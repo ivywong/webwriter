@@ -1,6 +1,8 @@
 import { Space } from "./model";
 import WebwriterLocalStore from "./store";
+
 import { debounce } from "ts-debounce";
+import hotkeys from "hotkeys-js";
 
 export class AppComponent {
   app: HTMLDivElement;
@@ -39,6 +41,7 @@ export class AppComponent {
     this.store = store;
 
     this._bindEvents();
+    this._setupHotkeys();
     this.render();
   }
 
@@ -63,49 +66,7 @@ export class AppComponent {
     };
 
     this.switchSpaceButton.onclick = () => {
-      const popupTemplate = document.getElementById(
-        "space-picker-template"
-      ) as HTMLTemplateElement;
-
-      const cloned = popupTemplate.content.cloneNode(true);
-      this.popup.appendChild(cloned);
-
-      const input = document.getElementById("space-picker-input") as HTMLInputElement;
-      const debouncedInputHandler = debounce(
-        (evt: InputEvent) => {
-          const filteredSpaces = this.store.filterSpaces(
-            (evt.target as HTMLInputElement).value.trim()
-          );
-          const spacesListEl = this.popup.querySelector("ul") as HTMLElement;
-          spacesListEl.replaceChildren(...filteredSpaces.map(this.createSpaceButton));
-        },
-        50,
-        { isImmediate: true }
-      );
-      input?.addEventListener("input", function (evt) {
-        debouncedInputHandler(evt as InputEvent);
-      });
-
-      const createSpaceButton = document.getElementById(
-        "create-space-button"
-      ) as HTMLButtonElement;
-
-      createSpaceButton.onclick = () => {
-        if (input.value !== "") {
-          const space = this.store.addSpace(input.value);
-          input.value = "";
-          this.store.switchToSpace(space.id);
-          this.closeModal();
-          this.closeMenu();
-        }
-      };
-
-      const spaceListEl = this.popup.getElementsByTagName("ul")[0] as HTMLUListElement;
-
-      for (const space of this.store.spaces) {
-        spaceListEl.appendChild(this.createSpaceButton(space));
-      }
-
+      this.renderSpaceSwitcher();
       this.openModal();
     };
 
@@ -115,6 +76,77 @@ export class AppComponent {
       }
     };
   }
+
+  _setupHotkeys() {
+    // enable hotkeys for inputs in the modal
+    // https://github.com/jaywcjlove/hotkeys-js?tab=readme-ov-file#filter
+    hotkeys.filter = function (event) {
+      const target = event.target as HTMLElement;
+      const inputs = ["TEXTAREA", "INPUT", "SELECT"];
+      return (
+        !inputs.includes(target.tagName) ||
+        (target.tagName === "INPUT" && hotkeys.getScope() === "modal")
+      );
+    };
+
+    hotkeys("ctrl+/, command+/", { scope: "canvas" }, () => {
+      if (!this.isModalOpen()) {
+        console.log("modal closed");
+        this.renderSpaceSwitcher();
+        this.openModal();
+      }
+    });
+
+    hotkeys("esc", { scope: "modal" }, () => {
+      this.closeModal();
+    });
+  }
+
+  private renderSpaceSwitcher() {
+    const popupTemplate = document.getElementById(
+      "space-picker-template"
+    ) as HTMLTemplateElement;
+
+    const cloned = popupTemplate.content.cloneNode(true);
+    this.popup.replaceChildren(cloned);
+
+    const input = document.getElementById("space-picker-input") as HTMLInputElement;
+    const debouncedInputHandler = debounce(
+      (evt: InputEvent) => {
+        const filteredSpaces = this.store.filterSpaces(
+          (evt.target as HTMLInputElement).value.trim()
+        );
+        const spacesListEl = this.popup.querySelector("ul") as HTMLElement;
+        spacesListEl.replaceChildren(...filteredSpaces.map(this.createSpaceButton));
+      },
+      50,
+      { isImmediate: true }
+    );
+    input?.addEventListener("input", function (evt) {
+      debouncedInputHandler(evt as InputEvent);
+    });
+
+    const createSpaceButton = document.getElementById(
+      "create-space-button"
+    ) as HTMLButtonElement;
+
+    createSpaceButton.onclick = () => {
+      if (input.value !== "") {
+        const space = this.store.addSpace(input.value);
+        input.value = "";
+        this.store.switchToSpace(space.id);
+        this.closeModal();
+        this.closeMenu();
+      }
+    };
+
+    const spaceListEl = this.popup.getElementsByTagName("ul")[0] as HTMLUListElement;
+
+    for (const space of this.store.spaces) {
+      spaceListEl.appendChild(this.createSpaceButton(space));
+    }
+  }
+
   render() {
     console.log("rerendering!");
     console.log("store data: ", this.store.data);
@@ -137,14 +169,20 @@ export class AppComponent {
     this.spaceToggle.removeAttribute("open");
   }
 
+  isModalOpen() {
+    return getComputedStyle(this.modal).display !== "none";
+  }
+
   openModal() {
     this.modal.style.display = "flex";
     document.body.style.overflow = "hidden";
+    hotkeys.setScope("modal");
   }
 
   closeModal() {
     this.modal.style.display = "none";
     document.body.style.overflow = "unset";
     this.popup.innerHTML = "";
+    hotkeys.setScope("canvas");
   }
 }
