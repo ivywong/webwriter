@@ -19,14 +19,6 @@ body {
   background-color: var(--background-color);
   color: var(--font-color);
   font-family: var(--font-family);
-
-  background-image: radial-gradient(
-    circle at 1px 1px,
-    var(--neutral-color) 1px,
-    transparent 0
-  );
-  background-size: 40px 40px;
-  background-position: 20px 20px;
 }
 
 h1,
@@ -59,6 +51,16 @@ a:focus {
 #canvas {
   width: 100vw;
   height: 4000px;
+}
+
+#canvas {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    var(--neutral-color) 1px,
+    transparent 0
+  );
+  background-size: 40px 40px;
+  background-position: 20px 20px;
 }
 
 svg {
