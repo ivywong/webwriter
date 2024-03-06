@@ -46,6 +46,10 @@ export class AppComponent {
   }
 
   _bindEvents() {
+    this.spaceToggle.onpointerdown = (evt: PointerEvent) => {
+      // prevent panning when clicking on the UI
+      evt.preventDefault();
+    };
     this.app.onclick = (evt: MouseEvent) => {
       const isChild = this.spaceToggle.contains(evt.target as Node);
       if (!isChild && this.spaceToggle.hasAttribute("open")) {
