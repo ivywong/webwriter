@@ -49,8 +49,8 @@ a:focus {
 
 #app,
 #canvas {
-  width: 100vw;
-  height: 4000px;
+  width: 2000px;
+  height: 1500px;
 }
 
 #canvas {
