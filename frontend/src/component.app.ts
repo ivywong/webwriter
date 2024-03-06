@@ -50,6 +50,16 @@ export class AppComponent {
       // prevent panning when clicking on the UI
       evt.preventDefault();
     };
+    this.spaceToggle.onkeydown = (evt: KeyboardEvent) => {
+      if (
+        evt.target === this.spaceToggle &&
+        (evt.code === "Enter" || evt.code === "Space")
+      ) {
+        this.toggleMenu();
+        evt.preventDefault();
+      }
+    };
+
     this.app.onclick = (evt: MouseEvent) => {
       const isChild = this.spaceToggle.contains(evt.target as Node);
       if (!isChild && this.spaceToggle.hasAttribute("open")) {
@@ -67,6 +77,13 @@ export class AppComponent {
       // TODO: add confirmation modal
       this.store.deleteSpace(this.store.currentSpaceId);
       this.closeMenu();
+    };
+
+    this.switchSpaceButton.onkeydown = (evt: KeyboardEvent) => {
+      if (evt.code === "Enter" || evt.code === "Space") {
+        this.renderSpaceSwitcher();
+        this.openModal();
+      }
     };
 
     this.switchSpaceButton.onclick = () => {
@@ -149,6 +166,8 @@ export class AppComponent {
     for (const space of this.store.spaces) {
       spaceListEl.appendChild(this.createSpaceButton(space));
     }
+
+    input.focus();
   }
 
   render() {
@@ -169,8 +188,20 @@ export class AppComponent {
     return button;
   }
 
+  openMenu() {
+    this.spaceToggle.setAttribute("open", "");
+  }
+
   closeMenu() {
     this.spaceToggle.removeAttribute("open");
+  }
+
+  toggleMenu() {
+    if (this.spaceToggle.hasAttribute("open")) {
+      this.closeMenu();
+    } else {
+      this.openMenu();
+    }
   }
 
   isModalOpen() {
