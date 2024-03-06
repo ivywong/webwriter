@@ -174,11 +174,11 @@ button:focus {
   gap: 2px;
 }
 
-.staggered :nth-child(odd) {
+.staggered > :nth-child(odd) {
   transform: rotate(1deg);
 }
 
-.staggered :nth-child(even) {
+.staggered > :nth-child(even) {
   transform: rotate(-1deg);
 }
 
