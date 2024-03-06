@@ -132,6 +132,13 @@ export class CanvasComponent {
       }
     });
 
+    this.$root.addEventListener("focusin", (evt) => {
+      console.log(evt);
+      if (this._isCardContainer(evt.target)) {
+        this._selectCard(evt.target);
+      }
+    });
+
     this.store.addEventListener("addCard", (evt: CustomEventInit) => {
       this.renderAddCard(evt.detail);
     });
@@ -209,6 +216,12 @@ export class CanvasComponent {
     this.store.currentSpace.cards.forEach((card) => this.renderAddCard(card));
   }
 
+  _selectCard(card: HTMLElement) {
+    this._deselectAll();
+    card.classList.add("selected");
+    this.selectedCardIds.push(card.dataset.contentId as string);
+  }
+
   _deselect(id: string) {
     const idx = this.selectedCardIds.indexOf(id);
     if (idx > -1) {
@@ -278,8 +291,7 @@ export class CanvasComponent {
     // TODO: toggle bulk selection, e.g. ctrl/cmd click
     this._deselectAll();
 
-    card.classList.add("selected");
-    this.selectedCardIds.push(card.dataset.contentId as string);
+    this._selectCard(card);
 
     const moveCallback = (moveEvent: PointerEvent) => {
       if (!card.hasPointerCapture(pointerId)) return;

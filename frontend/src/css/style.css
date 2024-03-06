@@ -74,14 +74,10 @@ button {
   min-width: 30px;
 }
 
-button:hover {
+button:hover,
+button:focus {
   background-color: var(--button-hover-bg);
   color: var(--button-hover-color);
-}
-
-button:focus {
-  background-color: black;
-  color: white;
 }
 
 #modal {
@@ -99,8 +95,8 @@ button:focus {
 #popup {
   top: 30%;
   position: fixed;
-  background-color: white;
-  border: 1px solid var(--highlight-color);
+  background-color: var(--background-color);
+  /* border: 1px solid var(--highlight-color); */
   min-width: 25%;
   max-height: 40%;
   padding: 15px;
@@ -122,10 +118,18 @@ button:focus {
   flex-direction: row;
   margin-block-end: 10px;
   justify-content: space-between;
+  align-items: center;
+  gap: 10px;
 }
 
 #space-picker-input-wrapper > input {
   width: 100%;
+  padding-inline-start: 10px;
+}
+
+#space-picker-input-wrapper > button {
+  width: 30px;
+  height: 100%;
 }
 
 #space-header {
@@ -214,6 +218,10 @@ details[open] summary:after {
   padding-inline: 0.8em;
 
   line-height: 1.5;
+}
+
+.card-container:focus-visible {
+  outline: none;
 }
 
 .card-actions {
