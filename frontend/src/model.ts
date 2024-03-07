@@ -20,6 +20,11 @@ export interface Serializable<T> {
   deserialize(obj: Object): T;
 }
 
+export type SpaceSettings = {
+  width: number;
+  height: number;
+};
+
 export class AppData {
   spaces: Space[];
   currentSpaceId: string;
@@ -117,10 +122,15 @@ export class Space {
   cards: CardView[] = [];
   links: Link[] = [];
   blocks: Block[] = [];
+  settings: SpaceSettings;
 
   constructor(name: string = "Untitled") {
     this.id = `space-${crypto.randomUUID()}`;
     this.name = name;
+    this.settings = {
+      width: 2000,
+      height: 1500,
+    };
   }
 
   static deserialize(obj: any): Space {
@@ -136,6 +146,7 @@ export class Space {
     s.blocks = obj.blocks.map((b: unknown) => {
       return Block.deserialize(b);
     });
+    s.settings = obj.settings;
     return s;
   }
 }

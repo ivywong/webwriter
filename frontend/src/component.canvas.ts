@@ -222,6 +222,12 @@ export class CanvasComponent {
 
   renderAll() {
     this.$root.innerHTML = "";
+
+    if (this.store.currentSpace.settings) {
+      this.$root.style.height = `${this.store.currentSpace.settings.height}px`;
+      this.$root.style.width = `${this.store.currentSpace.settings.width}px`;
+    }
+
     this.store.currentSpace.cards.forEach((card) => this.renderAddCard(card));
   }
 
@@ -278,7 +284,9 @@ export class CanvasComponent {
   ) {
     const pointerId = pointDownEvent.pointerId;
     const offset = { x: pointDownEvent.offsetX, y: pointDownEvent.offsetY };
-    const newPosition: Partial<ContainerPosition> = {};
+    const newPosition = structuredClone(
+      this.store.getCard(card.dataset.contentId as string)?.position
+    ) as ContainerPosition;
 
     console.log("card container pointer down");
     // bring element to front
@@ -309,18 +317,25 @@ export class CanvasComponent {
       card.classList.add("grabbed");
 
       const pointerCoords = this._convertPanZoomCoords(moveEvent.pageX, moveEvent.pageY);
-      const newX = pointerCoords.x - offset.x;
-      const newY = pointerCoords.y - offset.y;
+      const newCoords = {
+        x: pointerCoords.x - offset.x,
+        y: pointerCoords.y - offset.y,
+      };
 
-      card.style.left = `${newX}px`;
-      card.style.top = `${newY}px`;
+      if (!this.inCanvasBounds(newCoords)) {
+        return;
+      }
 
-      (newPosition.x = newX), (newPosition.y = newY);
+      card.style.left = `${newCoords.x}px`;
+      card.style.top = `${newCoords.y}px`;
+
+      (newPosition.x = newCoords.x), (newPosition.y = newCoords.y);
     };
 
     const cleanupDrag = () => {
       card.classList.remove("grabbed");
       this.store.updateCardPosition(card.dataset.contentId as string, newPosition);
+      this.expandCanvasIfRequired({ x: newPosition.x, y: newPosition.y });
       pz.resume();
     };
 
@@ -403,14 +418,67 @@ export class CanvasComponent {
     if (target === this.$root) {
       console.log("adding card");
 
+      const position = this._convertPanZoomCoords(evt.pageX, evt.pageY);
+      if (!this.inCanvasBounds(position)) {
+        return;
+      }
+
       this.store.addCard({
-        ...this._convertPanZoomCoords(evt.pageX, evt.pageY),
+        ...position,
         z: 0,
         w: -1,
       });
+
+      this.expandCanvasIfRequired(position);
     } else if (this._isCardContainer(target)) {
-      console.log("double clicked card");
       this._editCard(target.dataset.contentId as string);
     }
+  }
+
+  private expandCanvasIfRequired(position: { x: number; y: number }) {
+    const shouldExpand = this.inCanvasExpansionBounds(position);
+
+    if (shouldExpand.x || shouldExpand.y) {
+      const expansionAmount = 600;
+      const updatedSettings = {
+        width: this.store.currentSpace.settings.width,
+        height: this.store.currentSpace.settings.height,
+      };
+
+      if (shouldExpand.x) {
+        updatedSettings.width += expansionAmount;
+      }
+      if (shouldExpand.y) {
+        updatedSettings.height += expansionAmount;
+      }
+      this.store.updateCurrentSpaceSettings(updatedSettings);
+    }
+  }
+
+  private inCanvasBounds(position: { x: number; y: number }) {
+    return (
+      position.x > 0 &&
+      position.x <= this.store.currentSpace.settings.width &&
+      position.y > 0 &&
+      position.y <= this.store.currentSpace.settings.height
+    );
+  }
+
+  private inCanvasExpansionBounds(position: { x: number; y: number }): {
+    x: boolean;
+    y: boolean;
+  } {
+    const xBuffer = 300;
+    const yBuffer = 300;
+
+    if (!this.inCanvasBounds(position)) {
+      return { x: false, y: false };
+    }
+
+    const res = {
+      x: position.x >= this.store.currentSpace.settings.width - xBuffer,
+      y: position.y >= this.store.currentSpace.settings.height - yBuffer,
+    };
+    return res;
   }
 }

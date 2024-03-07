@@ -1,6 +1,13 @@
 import { deepEquals } from "./helper";
 import { SpaceHistory, State } from "./history";
-import { Space, Block, AppData, CardView, ContainerPosition } from "./model";
+import {
+  Space,
+  Block,
+  AppData,
+  CardView,
+  ContainerPosition,
+  SpaceSettings,
+} from "./model";
 
 export default class WebwriterLocalStore extends EventTarget {
   localStorageKey: string;
@@ -118,6 +125,14 @@ export default class WebwriterLocalStore extends EventTarget {
     this.spaces.push(space);
     this._save("addSpace", space);
     return space;
+  }
+
+  updateCurrentSpaceSettings(settings: Partial<SpaceSettings>) {
+    this.currentSpace.settings = {
+      ...this.currentSpace.settings,
+      ...settings,
+    };
+    this._save();
   }
 
   switchToSpace(id: string) {
