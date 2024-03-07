@@ -1,5 +1,6 @@
 import { Space } from "./model";
 import WebwriterLocalStore from "./store";
+import { pz } from "./app";
 
 import { debounce } from "ts-debounce";
 import hotkeys from "hotkeys-js";
@@ -9,7 +10,8 @@ export class AppComponent {
   canvas: HTMLDivElement;
   store: WebwriterLocalStore;
 
-  reset: HTMLButtonElement;
+  resetStorage: HTMLButtonElement;
+  resetZoom: HTMLButtonElement;
   spaceToggle: HTMLDetailsElement;
   spaceTitle: HTMLElement;
 
@@ -24,7 +26,8 @@ export class AppComponent {
   constructor($root: Document, store: WebwriterLocalStore) {
     this.app = $root.querySelector("#app") as HTMLDivElement;
     this.canvas = $root.getElementById("canvas") as HTMLDivElement;
-    this.reset = $root.getElementById("reset") as HTMLButtonElement;
+    this.resetStorage = $root.getElementById("reset-storage") as HTMLButtonElement;
+    this.resetZoom = $root.getElementById("reset-zoom") as HTMLButtonElement;
     this.spaceToggle = $root.getElementById("space-header") as HTMLDetailsElement;
     this.spaceTitle = $root.getElementById("space-title") as HTMLElement;
 
@@ -68,10 +71,19 @@ export class AppComponent {
     };
     this.store.addEventListener("save", this.render.bind(this));
 
-    this.reset.onclick = () => {
+    this.resetStorage.onclick = () => {
       this.store._resetStore();
       console.log("reset store data: ", this.store.data);
     };
+
+    this.resetZoom.onclick = () => {
+      pz.zoomAbs(0, 0, 1.0);
+      pz.moveTo(0, 0);
+    };
+
+    pz.on("zoom", () => {
+      this.resetZoom.textContent = `${Math.ceil(pz.getTransform().scale * 100)}%`;
+    });
 
     this.deleteSpaceButton.onclick = () => {
       // TODO: add confirmation modal

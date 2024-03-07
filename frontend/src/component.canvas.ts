@@ -1,11 +1,11 @@
 import WebwriterLocalStore from "./store";
 import { Block, CardView, ContainerPosition } from "./model";
 import { addDragEventListeners } from "./helper";
+import { pz } from "./app";
 
 import autosize from "autosize";
 import markdownit from "markdown-it";
 import hotkeys from "hotkeys-js";
-import panzoom, { PanZoom } from "panzoom";
 
 const MarkdownIt = markdownit();
 
@@ -20,8 +20,6 @@ export class CanvasComponent {
   selectedCardIds: string[];
   maxZIndex: number;
 
-  pz: PanZoom;
-
   constructor($root: HTMLDivElement, store: WebwriterLocalStore) {
     this.$root = $root;
     this.store = store;
@@ -31,7 +29,6 @@ export class CanvasComponent {
       Math.max(...this.store.currentSpace.cards.map((c) => c.position.z)) + 1;
     console.log(this.maxZIndex);
 
-    this.pz = this._setupPanzoom();
     this._setupHotkeys();
     this._bindEvents();
     this.renderAll();
@@ -60,23 +57,6 @@ export class CanvasComponent {
       value.classList.contains("card-action-button") &&
       value.dataset.action === action
     );
-  }
-
-  _setupPanzoom() {
-    return panzoom(this.$root, {
-      maxZoom: 2,
-      minZoom: 0.5,
-      zoomDoubleClickSpeed: 1, // disable
-      beforeWheel: function (e) {
-        var shouldIgnore = !(e.altKey || e.metaKey);
-        return shouldIgnore;
-      },
-      onDoubleClick: function () {
-        return false; // disable double click
-      },
-      bounds: true,
-      boundsPadding: 0.1,
-    });
   }
 
   _setupHotkeys() {
@@ -177,7 +157,7 @@ export class CanvasComponent {
   }
 
   _convertPanZoomCoords(x: number, y: number) {
-    const transform = this.pz.getTransform();
+    const transform = pz.getTransform();
     return {
       x: Math.floor((x - transform.x) / transform.scale),
       y: Math.floor((y - transform.y) / transform.scale),
@@ -273,7 +253,7 @@ export class CanvasComponent {
   private _pointerDownHandler(evt: PointerEvent) {
     console.log(evt);
     const target = evt.target;
-    this.pz.pause();
+    pz.pause();
     if (this._isCardContainer(target)) {
       this._handleCardContainerPointerDown(target, evt);
     } else if (this._isCardCorner("resize", target)) {
@@ -288,7 +268,7 @@ export class CanvasComponent {
       }
     } else if (target === this.$root) {
       this._deselectAll();
-      this.pz.resume();
+      pz.resume();
     }
   }
 
@@ -341,7 +321,7 @@ export class CanvasComponent {
     const cleanupDrag = () => {
       card.classList.remove("grabbed");
       this.store.updateCardPosition(card.dataset.contentId as string, newPosition);
-      this.pz.resume();
+      pz.resume();
     };
 
     addDragEventListeners(card, pointerId, moveCallback, cleanupDrag);
@@ -361,7 +341,7 @@ export class CanvasComponent {
       card.classList.add("grabbed", "resizing");
 
       // TODO: fix slight jump due to mouse offset
-      const transform = this.pz.getTransform();
+      const transform = pz.getTransform();
       textWidth = Math.floor(e.clientX / transform.scale - bounds.left);
       console.log(textWidth);
 
@@ -376,7 +356,7 @@ export class CanvasComponent {
       this.store.updateCardPosition(card.dataset.contentId as string, {
         w: textWidth,
       });
-      this.pz.resume();
+      pz.resume();
     };
 
     addDragEventListeners(target, pointerId, moveCallback, cleanup);
