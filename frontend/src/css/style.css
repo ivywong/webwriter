@@ -2,6 +2,7 @@
   --font-family: "IBM Plex Sans", Arial, Helvetica, sans-serif;
   --font-family-ui: "Alegreya Sans SC", Helvetica, sans-serif;
   --background-color: hsl(45, 55%, 96%);
+  --background-color-gutter: hsl(48, 9%, 90%);
   --highlight-color: hsl(8, 81%, 46%);
   --neutral-color: hsl(8, 32%, 61%);
   --neutral-color-gray: hsl(12, 3%, 70%);
@@ -16,7 +17,7 @@ html,
 body {
   margin: 0;
   min-height: 100%;
-  background-color: var(--background-color);
+  background-color: var(--background-color-gutter);
   color: var(--font-color);
   font-family: var(--font-family);
 }
@@ -61,6 +62,7 @@ a:focus {
   );
   background-size: 40px 40px;
   background-position: 20px 20px;
+  background-color: var(--background-color);
 }
 
 svg {
@@ -204,6 +206,26 @@ details[open] summary:after {
 #header-toggle {
   border: none;
   font-size: 1rem;
+}
+
+#footer {
+  position: fixed;
+  width: 100%;
+  bottom: 0px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  padding: 15px;
+  gap: 0.5rem;
+}
+
+#footer button {
+  border: 1px solid var(--neutral-color-gray);
+}
+
+#footer button:hover,
+#footer button:focus {
+  background-color: var(--neutral-color-gray);
 }
 
 .card-container {
