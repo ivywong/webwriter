@@ -152,7 +152,7 @@ export class CanvasComponent {
       this.renderUpdatedText(evt.detail);
     });
 
-    this.store.addEventListener("updateSpaceSize", (evt: CustomEventInit) => {
+    this.store.addEventListener("updateSpaceSize", () => {
       this.renderAll();
     });
 

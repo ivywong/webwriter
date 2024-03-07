@@ -145,7 +145,7 @@ button:focus {
   align-items: center;
 
   min-width: 200px;
-  position: absolute;
+  position: fixed;
   top: 5%;
   left: 50%;
   transform: translate(-50%, 0%);
