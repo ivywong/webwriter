@@ -79,16 +79,9 @@ export class AppComponent {
       this.closeMenu();
     };
 
-    this.switchSpaceButton.onkeydown = (evt: KeyboardEvent) => {
-      if (evt.code === "Enter" || evt.code === "Space") {
-        this.renderSpaceSwitcher();
-        this.openModal();
-      }
-    };
-
     this.switchSpaceButton.onclick = () => {
-      this.renderSpaceSwitcher();
       this.openModal();
+      this.renderSpaceSwitcher();
     };
 
     this.modal.onclick = (evt: MouseEvent) => {
@@ -113,8 +106,8 @@ export class AppComponent {
     hotkeys("ctrl+/, command+/", { scope: "canvas" }, () => {
       if (!this.isModalOpen()) {
         console.log("modal closed");
-        this.renderSpaceSwitcher();
         this.openModal();
+        this.renderSpaceSwitcher();
       }
     });
 
