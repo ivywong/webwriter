@@ -1,16 +1,18 @@
-import { AppData } from "./model";
+import { Space } from "./model";
 
-type State = AppData;
+export type State = Space;
 
-export class CanvasHistory {
+export class SpaceHistory {
   undos: State[];
   redos: State[];
   current: State;
+  spaceId: string;
 
-  constructor(state: State) {
+  constructor(spaceId: string, state: State) {
     this.undos = [];
     this.redos = [];
     this.current = state;
+    this.spaceId = spaceId;
   }
 
   get prevState() {

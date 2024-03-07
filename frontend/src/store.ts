@@ -1,17 +1,17 @@
 import { deepEquals } from "./helper";
-import { CanvasHistory } from "./history";
+import { SpaceHistory, State } from "./history";
 import { Space, Block, AppData, CardView, ContainerPosition } from "./model";
 
 export default class WebwriterLocalStore extends EventTarget {
   localStorageKey: string;
 
   data: AppData;
-  history: CanvasHistory;
+  history: Map<string, SpaceHistory> = new Map();
 
   constructor(localStorageKey: string) {
     super();
     this.localStorageKey = localStorageKey;
-    this.data = new AppData([], [], "");
+    this.data = new AppData([], "");
     this._readStorage();
 
     window.addEventListener(
@@ -23,10 +23,13 @@ export default class WebwriterLocalStore extends EventTarget {
       false
     );
 
-    this.history = new CanvasHistory(structuredClone(this.data));
+    this.history.set(
+      this.currentSpaceId,
+      new SpaceHistory(this.currentSpaceId, this.copyCurrentState())
+    );
   }
   _resetStore() {
-    this.data = new AppData([], [], "");
+    this.data = new AppData([], "");
     window.localStorage.removeItem(this.localStorageKey);
     this._save();
   }
@@ -65,14 +68,6 @@ export default class WebwriterLocalStore extends EventTarget {
     this.data.currentSpaceId = spaceId;
   }
 
-  get blocks() {
-    return this.data.blocks;
-  }
-
-  set blocks(blocks: Block[]) {
-    this.data.blocks = blocks;
-  }
-
   get spaces() {
     return this.data.spaces;
   }
@@ -83,6 +78,25 @@ export default class WebwriterLocalStore extends EventTarget {
 
   get currentSpace() {
     return this.getSpace(this.currentSpaceId);
+  }
+
+  set currentSpace(state: Space) {
+    const idx = this.data.spaces.findIndex((s) => s.id === this.currentSpaceId);
+    if (idx !== -1) {
+      this.data.spaces[idx] = state;
+    }
+  }
+
+  get currentBlocks() {
+    return this.currentSpace.blocks;
+  }
+
+  set currentBlocks(blocks: Block[]) {
+    this.currentSpace.blocks = blocks;
+  }
+
+  get currentHistory() {
+    return this.history.get(this.currentSpaceId);
   }
 
   getSpace(id: string) {
@@ -109,6 +123,12 @@ export default class WebwriterLocalStore extends EventTarget {
   switchToSpace(id: string) {
     if (this.spaces.filter((s) => s.id === id).length === 1) {
       this.currentSpaceId = id;
+      if (!this.history.has(this.currentSpaceId)) {
+        this.history.set(
+          this.currentSpaceId,
+          new SpaceHistory(this.currentSpaceId, this.copyCurrentState())
+        );
+      }
       this._save();
     } else {
       throw new Error(`Error getting space with id: '${id}'`);
@@ -130,21 +150,23 @@ export default class WebwriterLocalStore extends EventTarget {
         this.switchToSpace(this.spaces[0].id);
       }
     }
+    this.history.delete(id);
     this._save();
   }
 
   addBlock() {
     const block = new Block(this.currentSpaceId);
-    this.blocks.push(block);
+    this.currentBlocks.push(block);
     this._save("addBlock", block);
   }
 
+  // TODO: support cross-space block lookup
   getBlock(id: string) {
-    return this.blocks.find((b) => b.id === id);
+    return this.currentBlocks.find((b) => b.id === id);
   }
 
   deleteBlock(id: string) {
-    this.blocks = this.blocks.filter((b) => b.id !== id);
+    this.currentBlocks = this.currentBlocks.filter((b) => b.id !== id);
   }
 
   updateBlockContent(id: string, content: string) {
@@ -152,7 +174,7 @@ export default class WebwriterLocalStore extends EventTarget {
     if (block) {
       block.content = content;
       this._save("updateBlock", block);
-      this.history.add(structuredClone(this.data));
+      this.addUndoable();
     }
   }
 
@@ -165,7 +187,7 @@ export default class WebwriterLocalStore extends EventTarget {
     if (content) {
       block.content = content;
     }
-    this.blocks.push(block);
+    this.currentBlocks.push(block);
 
     const card: CardView = {
       contentId: block.id,
@@ -175,7 +197,7 @@ export default class WebwriterLocalStore extends EventTarget {
     this.currentSpace.cards.push(card);
 
     this._save("addCard", card);
-    this.history.add(structuredClone(this.data));
+    this.addUndoable();
     return card;
   }
 
@@ -191,7 +213,7 @@ export default class WebwriterLocalStore extends EventTarget {
 
       card.position = mergedPosition;
       this._save("updateCardPosition", card);
-      this.history.add(structuredClone(this.data));
+      this.addUndoable();
       console.log(`saved card ${cardId} position`, card.position);
     } else {
       console.error(`${cardId} not found!`);
@@ -204,21 +226,34 @@ export default class WebwriterLocalStore extends EventTarget {
       (c) => c.contentId !== contentId
     );
     this._save("deleteCard", contentId);
-    this.history.add(structuredClone(this.data));
+    this.addUndoable();
+  }
+
+  copyCurrentState() {
+    return structuredClone(this.currentSpace);
+  }
+
+  addUndoable() {
+    this.history.get(this.currentSpaceId)?.add(this.copyCurrentState());
+  }
+
+  merge(data: AppData, state: State) {
+    data.spaces = [...data.spaces.filter((s) => s.id !== this.currentSpaceId), state];
+    console.log(`merged ${state} into data`);
   }
 
   undo() {
-    if (this.history.prevState) {
-      this.data = structuredClone(this.history.prevState);
-      this.history.undo();
+    if (this.currentHistory?.prevState) {
+      this.merge(this.data, structuredClone(this.currentHistory.prevState));
+      this.currentHistory.undo();
       this._save();
     }
   }
 
   redo() {
-    if (this.history.nextState) {
-      this.data = structuredClone(this.history.nextState);
-      this.history.redo();
+    if (this.currentHistory?.nextState) {
+      this.merge(this.data, structuredClone(this.currentHistory.nextState));
+      this.currentHistory.redo();
       this._save();
     }
   }

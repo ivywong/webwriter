@@ -20,19 +20,12 @@ export interface Serializable<T> {
   deserialize(obj: Object): T;
 }
 
-// TODO: rename?
 export class AppData {
   spaces: Space[];
-  blocks: Block[];
   currentSpaceId: string;
 
-  constructor(
-    spaces: Space[] = [],
-    blocks: Block[] = [],
-    currentSpaceId: string | undefined
-  ) {
+  constructor(spaces: Space[] = [], currentSpaceId: string | undefined) {
     this.spaces = spaces;
-    this.blocks = blocks;
 
     if (currentSpaceId) {
       this.currentSpaceId = currentSpaceId;
@@ -50,13 +43,10 @@ export class AppData {
     const spaces = obj.spaces.map((s: any) => {
       return Space.deserialize(s);
     });
-    const blocks = obj.blocks.map((b: any) => {
-      return Block.deserialize(b);
-    });
     // TODO: null check?
     const currentSpaceId = obj.currentSpaceId;
 
-    return new AppData(spaces, blocks, currentSpaceId);
+    return new AppData(spaces, currentSpaceId);
   }
 }
 
@@ -80,10 +70,10 @@ export class Block {
   }
 
   static deserialize(obj: any) {
-    const b = new Block(obj.origin);
+    const b = new Block(obj.spaceId);
     b.id = obj.id;
     b.content = obj.content;
-    b.spaceId = obj.origin;
+    b.spaceId = obj.spaceId;
     b.created = obj.created;
     b.last_updated = obj.last_updated;
     return b;
@@ -126,21 +116,26 @@ export class Space {
   stacks: Stack[] = [];
   cards: CardView[] = [];
   links: Link[] = [];
+  blocks: Block[] = [];
 
   constructor(name: string = "Untitled") {
     this.id = `space-${crypto.randomUUID()}`;
     this.name = name;
   }
 
-  static deserialize(obj: any) {
+  static deserialize(obj: any): Space {
     const s = new Space();
+
     s.id = obj.id;
     s.name = obj.name;
-    s.stacks = obj.stacks.map((s: any) => {
-      Stack.deserialize(s);
+    s.stacks = obj.stacks.map((s: unknown) => {
+      return Stack.deserialize(s);
     });
     s.cards = obj.cards;
     s.links = obj.links;
+    s.blocks = obj.blocks.map((b: unknown) => {
+      return Block.deserialize(b);
+    });
     return s;
   }
 }
