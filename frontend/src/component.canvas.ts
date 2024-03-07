@@ -151,6 +151,11 @@ export class CanvasComponent {
     this.store.addEventListener("updateBlock", (evt: CustomEventInit) => {
       this.renderUpdatedText(evt.detail);
     });
+
+    this.store.addEventListener("updateSpaceSize", (evt: CustomEventInit) => {
+      this.renderAll();
+    });
+
     this.store.addEventListener("save", () => {
       this.renderAll();
     });
@@ -451,7 +456,7 @@ export class CanvasComponent {
       if (shouldExpand.y) {
         updatedSettings.height += expansionAmount;
       }
-      this.store.updateCurrentSpaceSettings(updatedSettings);
+      this.store.updateCurrentSpaceSettings(updatedSettings, "updateSpaceSize");
     }
   }
 

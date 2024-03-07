@@ -127,12 +127,15 @@ export default class WebwriterLocalStore extends EventTarget {
     return space;
   }
 
-  updateCurrentSpaceSettings(settings: Partial<SpaceSettings>) {
+  updateCurrentSpaceSettings(
+    settings: Partial<SpaceSettings>,
+    type: "updateSpaceSize" | "rename"
+  ) {
     this.currentSpace.settings = {
       ...this.currentSpace.settings,
       ...settings,
     };
-    this._save();
+    this._save(type, this.currentSpace.settings);
   }
 
   switchToSpace(id: string) {
