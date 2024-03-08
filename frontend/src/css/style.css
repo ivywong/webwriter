@@ -20,6 +20,7 @@ body {
   background-color: var(--background-color-gutter);
   color: var(--font-color);
   font-family: var(--font-family);
+  overflow: hidden;
 }
 
 h1,
