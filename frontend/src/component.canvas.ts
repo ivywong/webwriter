@@ -308,17 +308,7 @@ export class CanvasComponent {
 
     console.log("card container pointer down");
     // bring element to front
-    if (
-      card.style.zIndex === "" ||
-      card.style.zIndex === "auto" ||
-      Number(card.style.zIndex) < this.maxZIndex
-    ) {
-      const newZ = this.maxZIndex + 1;
-      card.style.zIndex = `${newZ}`;
-      this.maxZIndex += 1;
-
-      newPosition.z = newZ;
-    }
+    this._bringToFront(card, newPosition);
 
     // ignore move events if we are editing
     if (card.classList.contains("editing")) {
@@ -362,13 +352,30 @@ export class CanvasComponent {
     addDragEventListeners(card, pointerId, moveCallback, cleanupDrag);
   }
 
+  private _bringToFront(card: HTMLDivElement, newPosition: Partial<ContainerPosition>) {
+    if (
+      card.style.zIndex === "" ||
+      card.style.zIndex === "auto" ||
+      Number(card.style.zIndex) < this.maxZIndex
+    ) {
+      const newZ = this.maxZIndex + 1;
+      card.style.zIndex = `${newZ}`;
+      this.maxZIndex += 1;
+
+      newPosition.z = newZ;
+    }
+  }
+
   private _resizeHandler(target: HTMLDivElement, evt: PointerEvent): void {
     const pointerId = evt.pointerId;
     const card = target.parentElement as HTMLDivElement;
     const textbox = card.querySelector(".card-text") as HTMLTextAreaElement;
     const bounds = card?.getBoundingClientRect();
+    const newPosition = {} as Partial<ContainerPosition>;
 
     let textWidth = bounds.width;
+
+    this._bringToFront(card, newPosition);
 
     const moveCallback = (e: PointerEvent) => {
       if (!target.hasPointerCapture(pointerId)) return;
@@ -381,15 +388,14 @@ export class CanvasComponent {
 
       card.style.maxWidth = "none";
       card.style.width = `${textWidth}px`;
+      newPosition.w = textWidth;
 
       autosize.update(textbox);
     };
 
     const cleanup = () => {
       card.classList.remove("grabbed", "resizing");
-      this.store.updateCardPosition(card.dataset.contentId as string, {
-        w: textWidth,
-      });
+      this.store.updateCardPosition(card.dataset.contentId as string, newPosition);
       pz.resume();
     };
 

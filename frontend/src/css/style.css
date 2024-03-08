@@ -318,6 +318,7 @@ details[open] summary:after {
   user-select: none;
   pointer-events: none;
   display: block;
+  margin-right: 10px;
 }
 
 .card-text-rendered > :first-child {
@@ -357,6 +358,7 @@ details[open] summary:after {
   cursor: col-resize;
   border-radius: 0;
   height: 100%;
+  z-index: 1;
 }
 
 .card-corner[data-action="link"] {
