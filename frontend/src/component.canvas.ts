@@ -384,7 +384,7 @@ export class CanvasComponent {
 
       // TODO: fix slight jump due to mouse offset
       const transform = pz.getTransform();
-      textWidth = Math.floor(e.clientX / transform.scale - bounds.left);
+      textWidth = Math.floor((e.clientX - bounds.left) / transform.scale);
 
       card.style.maxWidth = "none";
       card.style.width = `${textWidth}px`;
