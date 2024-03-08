@@ -304,9 +304,7 @@ export class CanvasComponent {
   ) {
     const pointerId = pointDownEvent.pointerId;
     const offset = { x: pointDownEvent.offsetX, y: pointDownEvent.offsetY };
-    const newPosition = structuredClone(
-      this.store.getCard(card.dataset.contentId as string)?.position
-    ) as ContainerPosition;
+    const newPosition = {} as Partial<ContainerPosition>;
 
     console.log("card container pointer down");
     // bring element to front
@@ -354,8 +352,10 @@ export class CanvasComponent {
 
     const cleanupDrag = () => {
       card.classList.remove("grabbed");
-      this.store.updateCardPosition(card.dataset.contentId as string, newPosition);
-      this.expandCanvasIfRequired({ x: newPosition.x, y: newPosition.y });
+      if (newPosition.x && newPosition.y) {
+        this.store.updateCardPosition(card.dataset.contentId as string, newPosition);
+        this.expandCanvasIfRequired({ x: newPosition.x, y: newPosition.y });
+      }
       pz.resume();
     };
 
@@ -378,7 +378,6 @@ export class CanvasComponent {
       // TODO: fix slight jump due to mouse offset
       const transform = pz.getTransform();
       textWidth = Math.floor(e.clientX / transform.scale - bounds.left);
-      console.log(textWidth);
 
       card.style.maxWidth = "none";
       card.style.width = `${textWidth}px`;
