@@ -211,12 +211,21 @@ export default class WebwriterLocalStore extends EventTarget {
       contentId: block.id,
       position: position,
       isLocked: false,
+      color: "#ffffff",
     };
     this.currentSpace.cards.push(card);
 
     this._save("addCard", card);
     this.addUndoable();
     return card;
+  }
+
+  updateCardColor(cardId: string, color: string) {
+    const card = this.getCard(cardId);
+    if (card) {
+      card.color = color;
+      this._save();
+    }
   }
 
   updateCardPosition(cardId: string, position: Partial<ContainerPosition>) {

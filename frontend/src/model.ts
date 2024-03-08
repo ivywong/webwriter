@@ -14,6 +14,7 @@ export type CardView = {
   contentId: string;
   position: ContainerPosition;
   isLocked: boolean;
+  color: string;
 };
 
 export interface Serializable<T> {

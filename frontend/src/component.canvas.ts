@@ -194,6 +194,7 @@ export class CanvasComponent {
     container.style.left = `${card.position.x}px`;
     container.style.zIndex = `${card.position.z}`;
     container.dataset.contentId = `${card.contentId}`;
+    container.style.backgroundColor = `${card.color}`;
 
     if (card.position.w !== -1) {
       container.style.maxWidth = "none";
@@ -276,6 +277,19 @@ export class CanvasComponent {
       const card = target.closest(".card-container") as HTMLDivElement;
       if (card.dataset.contentId) {
         this.store.deleteCard(card.dataset.contentId);
+      }
+    } else if (this._isCardMenuAction("color", target)) {
+      const input = document.getElementById("card-colorpicker") as HTMLInputElement;
+      const cardEl = target.closest(".card-container") as HTMLDivElement;
+      const card = this.store.getCard(cardEl.dataset.contentId as string);
+
+      if (card) {
+        console.log(input.value, card.color);
+        input.value = card.color ?? "#ffffff";
+        input.oninput = () => {
+          this.store.updateCardSettings(card?.contentId, input.value);
+        };
+        input.click();
       }
     } else if (target === this.$root) {
       this._deselectAll();

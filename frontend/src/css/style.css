@@ -261,6 +261,10 @@ details[open] summary:after {
   display: none;
 }
 
+#card-colorpicker {
+  display: none;
+}
+
 .card-container.selected > .card-actions {
   display: flex;
 }
