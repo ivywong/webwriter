@@ -339,9 +339,11 @@ details[open] summary:after {
 }
 
 .card-corner[data-action="resize"] {
-  bottom: -5px;
+  bottom: 0px;
   right: -5px;
   cursor: col-resize;
+  border-radius: 0;
+  height: 100%;
 }
 
 .card-corner[data-action="link"] {
