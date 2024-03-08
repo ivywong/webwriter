@@ -187,6 +187,7 @@ export class CanvasComponent {
     textbox.value = content;
     textbox.style.display = "none";
 
+    const colorStrip = container.querySelector(".card-color") as HTMLDivElement;
     const preview = container.querySelector(".card-text-rendered") as HTMLDivElement;
     preview.innerHTML = MarkdownIt.render(content);
 
@@ -194,7 +195,7 @@ export class CanvasComponent {
     container.style.left = `${card.position.x}px`;
     container.style.zIndex = `${card.position.z}`;
     container.dataset.contentId = `${card.contentId}`;
-    container.style.backgroundColor = `${card.color}`;
+    colorStrip.style.backgroundColor = `${card.color}`;
 
     if (card.position.w !== -1) {
       container.style.maxWidth = "none";
@@ -287,7 +288,7 @@ export class CanvasComponent {
         console.log(input.value, card.color);
         input.value = card.color ?? "#ffffff";
         input.oninput = () => {
-          this.store.updateCardSettings(card?.contentId, input.value);
+          this.store.updateCardColor(card?.contentId, input.value);
         };
         input.click();
       }

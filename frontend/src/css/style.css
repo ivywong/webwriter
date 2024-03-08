@@ -249,6 +249,15 @@ details[open] summary:after {
   outline: none;
 }
 
+.card-color {
+  height: 100%;
+  width: 0.6rem;
+  background-color: white;
+  position: fixed;
+  top: 0;
+  right: 0;
+}
+
 .card-actions {
   display: flex;
   flex-direction: row;
@@ -320,7 +329,7 @@ details[open] summary:after {
 }
 
 .card-container:focus-within {
-  border: 3px double var(--highlight-color);
+  outline: 3px double var(--highlight-color);
 }
 
 .card-container.editing .card-text {
