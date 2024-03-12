@@ -255,7 +255,7 @@ details[open] summary:after {
   background-color: white;
   position: fixed;
   top: 0;
-  right: 0;
+  left: 0;
 }
 
 .card-actions {
@@ -318,7 +318,7 @@ details[open] summary:after {
   user-select: none;
   pointer-events: none;
   display: block;
-  margin-right: 10px;
+  margin-inline: 10px;
 }
 
 .card-text-rendered > :first-child {
