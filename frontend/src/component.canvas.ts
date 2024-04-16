@@ -43,15 +43,22 @@ export class CanvasComponent {
 
   _isCardContainer(value: unknown): value is HTMLDivElement {
     return (
-      value instanceof HTMLDivElement && value.classList.contains(cardContainerClass)
+      value instanceof HTMLDivElement &&
+      value.classList.contains(cardContainerClass)
     );
   }
 
-  _isCardCorner(action: CardCornerAction, value: unknown): value is HTMLDivElement {
+  _isCardCorner(
+    action: CardCornerAction,
+    value: unknown,
+  ): value is HTMLDivElement {
     return value instanceof HTMLDivElement && value.dataset.action === action;
   }
 
-  _isCardMenuAction(action: CardMenuAction, value: unknown): value is HTMLButtonElement {
+  _isCardMenuAction(
+    action: CardMenuAction,
+    value: unknown,
+  ): value is HTMLButtonElement {
     return (
       value instanceof HTMLButtonElement &&
       value.classList.contains("card-action-button") &&
@@ -71,12 +78,13 @@ export class CanvasComponent {
       () => {
         console.log("redo canvas state");
         this.store.redo();
-      }
+      },
     );
 
     hotkeys("ctrl+c, command+c", { scope: "canvas" }, () => {
       if (this.selectedCardIds.length === 1) {
-        const content = this.store.getBlock(this.selectedCardIds[0])?.content as string;
+        const content = this.store.getBlock(this.selectedCardIds[0])
+          ?.content as string;
         navigator.clipboard.writeText(content).then(() => {
           console.log("copied to clipboard");
         });
@@ -87,7 +95,10 @@ export class CanvasComponent {
     hotkeys("ctrl+v, command+v", { scope: "canvas" }, () => {
       navigator.clipboard.readText().then((copied: string) => {
         console.log(`Pasted: ${copied}`);
-        this.store.addCard({ x: 100, y: 100, z: this.maxZIndex, w: -1 }, copied);
+        this.store.addCard(
+          { x: 100, y: 100, z: this.maxZIndex, w: -1 },
+          copied,
+        );
       });
     });
 
@@ -124,8 +135,14 @@ export class CanvasComponent {
   }
 
   _bindEvents() {
-    this.$root.addEventListener("pointerdown", this._pointerDownHandler.bind(this));
-    this.$root.addEventListener("dblclick", this._doubleClickHandler.bind(this));
+    this.$root.addEventListener(
+      "pointerdown",
+      this._pointerDownHandler.bind(this),
+    );
+    this.$root.addEventListener(
+      "dblclick",
+      this._doubleClickHandler.bind(this),
+    );
     this.$root.addEventListener("keydown", (evt) => {
       if (evt.target instanceof HTMLTextAreaElement && evt.key === "Escape") {
         console.log("blurring textarea");
@@ -170,25 +187,33 @@ export class CanvasComponent {
   }
 
   renderAddCard(card: CardView) {
-    let cardTemplate = document.querySelector("#card-template") as HTMLTemplateElement;
+    let cardTemplate = document.querySelector(
+      "#card-template",
+    ) as HTMLTemplateElement;
 
     let cloned = cardTemplate.content.cloneNode(true);
     this.$root.appendChild(cloned);
 
-    const container = this.$root.querySelector(`.${cardContainerClass}:last-of-type`);
+    const container = this.$root.querySelector(
+      `.${cardContainerClass}:last-of-type`,
+    );
     const content = this.store.getBlock(card.contentId)?.content as string;
 
     if (!this._isCardContainer(container)) {
       throw new Error("Failed to add new card!");
     }
 
-    const textbox = container.querySelector(`.card-text`) as HTMLTextAreaElement;
+    const textbox = container.querySelector(
+      `.card-text`,
+    ) as HTMLTextAreaElement;
     autosize(textbox);
     textbox.value = content;
     textbox.style.display = "none";
 
     const colorStrip = container.querySelector(".card-color") as HTMLDivElement;
-    const preview = container.querySelector(".card-text-rendered") as HTMLDivElement;
+    const preview = container.querySelector(
+      ".card-text-rendered",
+    ) as HTMLDivElement;
     preview.innerHTML = MarkdownIt.render(content);
 
     container.style.top = `${card.position.y}px`;
@@ -221,7 +246,7 @@ export class CanvasComponent {
 
   renderUpdatedText(block: Block) {
     const rendered = this.$root.querySelector(
-      `[data-content-id='${block.id}'] .card-text-rendered`
+      `[data-content-id='${block.id}'] .card-text-rendered`,
     ) as HTMLDivElement;
     rendered.innerHTML = MarkdownIt.render(block.content);
     console.log(`rendered block: ${block.id}`);
@@ -280,7 +305,9 @@ export class CanvasComponent {
         this.store.deleteCard(card.dataset.contentId);
       }
     } else if (this._isCardMenuAction("color", target)) {
-      const input = document.getElementById("card-colorpicker") as HTMLInputElement;
+      const input = document.getElementById(
+        "card-colorpicker",
+      ) as HTMLInputElement;
       const cardEl = target.closest(".card-container") as HTMLDivElement;
       const card = this.store.getCard(cardEl.dataset.contentId as string);
 
@@ -300,7 +327,7 @@ export class CanvasComponent {
 
   private _handleCardContainerPointerDown(
     card: HTMLDivElement,
-    pointDownEvent: PointerEvent
+    pointDownEvent: PointerEvent,
   ) {
     const pointerId = pointDownEvent.pointerId;
     const offset = { x: pointDownEvent.offsetX, y: pointDownEvent.offsetY };
@@ -324,7 +351,10 @@ export class CanvasComponent {
 
       card.classList.add("grabbed");
 
-      const pointerCoords = this._convertPanZoomCoords(moveEvent.pageX, moveEvent.pageY);
+      const pointerCoords = this._convertPanZoomCoords(
+        moveEvent.pageX,
+        moveEvent.pageY,
+      );
       const newCoords = {
         x: pointerCoords.x - offset.x,
         y: pointerCoords.y - offset.y,
@@ -343,7 +373,10 @@ export class CanvasComponent {
     const cleanupDrag = () => {
       card.classList.remove("grabbed");
       if (newPosition.x && newPosition.y) {
-        this.store.updateCardPosition(card.dataset.contentId as string, newPosition);
+        this.store.updateCardPosition(
+          card.dataset.contentId as string,
+          newPosition,
+        );
         this.expandCanvasIfRequired({ x: newPosition.x, y: newPosition.y });
       }
       pz.resume();
@@ -352,7 +385,10 @@ export class CanvasComponent {
     addDragEventListeners(card, pointerId, moveCallback, cleanupDrag);
   }
 
-  private _bringToFront(card: HTMLDivElement, newPosition: Partial<ContainerPosition>) {
+  private _bringToFront(
+    card: HTMLDivElement,
+    newPosition: Partial<ContainerPosition>,
+  ) {
     if (
       card.style.zIndex === "" ||
       card.style.zIndex === "auto" ||
@@ -395,7 +431,10 @@ export class CanvasComponent {
 
     const cleanup = () => {
       card.classList.remove("grabbed", "resizing");
-      this.store.updateCardPosition(card.dataset.contentId as string, newPosition);
+      this.store.updateCardPosition(
+        card.dataset.contentId as string,
+        newPosition,
+      );
       pz.resume();
     };
 
@@ -409,7 +448,9 @@ export class CanvasComponent {
     }
 
     const textbox = target.querySelector(".card-text") as HTMLTextAreaElement;
-    const preview = target.querySelector(".card-text-rendered") as HTMLDivElement;
+    const preview = target.querySelector(
+      ".card-text-rendered",
+    ) as HTMLDivElement;
 
     preview.style.display = "none";
     textbox.style.display = "block";
@@ -433,7 +474,7 @@ export class CanvasComponent {
         preview.style.display = "block";
         textbox.style.display = "none";
       },
-      { once: true }
+      { once: true },
     );
   }
 

@@ -27,12 +27,12 @@ export default class WebwriterLocalStore extends EventTarget {
         this._readStorage();
         this._save();
       },
-      false
+      false,
     );
 
     this.history.set(
       this.currentSpaceId,
-      new SpaceHistory(this.currentSpaceId, this.copyCurrentState())
+      new SpaceHistory(this.currentSpaceId, this.copyCurrentState()),
     );
   }
   _resetStore() {
@@ -61,9 +61,15 @@ export default class WebwriterLocalStore extends EventTarget {
     }
   }
   _save(event?: string, data?: unknown) {
-    window.localStorage.setItem(this.localStorageKey, JSON.stringify(this.data));
+    window.localStorage.setItem(
+      this.localStorageKey,
+      JSON.stringify(this.data),
+    );
     this.dispatchEvent(
-      new CustomEvent(event ? event : "save", data ? { detail: data } : undefined)
+      new CustomEvent(
+        event ? event : "save",
+        data ? { detail: data } : undefined,
+      ),
     );
   }
 
@@ -129,7 +135,7 @@ export default class WebwriterLocalStore extends EventTarget {
 
   updateCurrentSpaceSettings(
     settings: Partial<SpaceSettings>,
-    type: "updateSpaceSize" | "rename"
+    type: "updateSpaceSize" | "rename",
   ) {
     this.currentSpace.settings = {
       ...this.currentSpace.settings,
@@ -144,7 +150,7 @@ export default class WebwriterLocalStore extends EventTarget {
       if (!this.history.has(this.currentSpaceId)) {
         this.history.set(
           this.currentSpaceId,
-          new SpaceHistory(this.currentSpaceId, this.copyCurrentState())
+          new SpaceHistory(this.currentSpaceId, this.copyCurrentState()),
         );
       }
       this._save();
@@ -250,7 +256,7 @@ export default class WebwriterLocalStore extends EventTarget {
   deleteCard(contentId: string) {
     this.deleteBlock(contentId);
     this.currentSpace.cards = this.currentSpace.cards.filter(
-      (c) => c.contentId !== contentId
+      (c) => c.contentId !== contentId,
     );
     this._save("deleteCard", contentId);
     this.addUndoable();
@@ -265,7 +271,10 @@ export default class WebwriterLocalStore extends EventTarget {
   }
 
   merge(data: AppData, state: State) {
-    data.spaces = [...data.spaces.filter((s) => s.id !== this.currentSpaceId), state];
+    data.spaces = [
+      ...data.spaces.filter((s) => s.id !== this.currentSpaceId),
+      state,
+    ];
     console.log(`merged ${state} into data`);
   }
 
