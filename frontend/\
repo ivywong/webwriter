@@ -227,10 +227,6 @@ export class CanvasComponent {
       container.style.width = `${card.position.w}px`;
     }
 
-    if (card.isLocked) {
-      container.classList.add("locked");
-    }
-
     autosize.update(textbox);
 
     console.log(container);
@@ -309,22 +305,6 @@ export class CanvasComponent {
         this.store.deleteCard(card.dataset.contentId);
       }
     } else if (this._isCardMenuAction("lock", target)) {
-      console.log("lock card");
-      const card = target.closest(".card-container") as HTMLDivElement;
-      if (card.dataset.contentId) {
-        if (card.classList.contains("locked")) {
-          card.classList.remove("locked");
-          target
-            .querySelector("svg use")
-            ?.setAttribute("href", "#icon-unlocked");
-          console.log(target);
-        } else {
-          card.classList.add("locked");
-          target.querySelector("svg use")?.setAttribute("href", "#icon-locked");
-          console.log(target);
-        }
-        this.store.toggleLockCard(card.dataset.contentId);
-      }
     } else if (this._isCardMenuAction("color", target)) {
       const input = document.getElementById(
         "card-colorpicker",
@@ -359,10 +339,7 @@ export class CanvasComponent {
     this._bringToFront(card, newPosition);
 
     // ignore move events if we are editing
-    if (
-      card.classList.contains("editing") ||
-      card.classList.contains("locked")
-    ) {
+    if (card.classList.contains("editing")) {
       return;
     }
 
@@ -467,11 +444,7 @@ export class CanvasComponent {
 
   private _editCard(cardId: string) {
     const target = this.$root.querySelector(`[data-content-id='${cardId}'`);
-    if (
-      !target ||
-      target.classList.contains("editing") ||
-      target.classList.contains("locked")
-    ) {
+    if (!target || target.classList.contains("editing")) {
       return;
     }
 

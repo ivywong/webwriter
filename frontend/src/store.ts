@@ -253,7 +253,21 @@ export default class WebwriterLocalStore extends EventTarget {
     }
   }
 
+  toggleLockCard(cardId: string) {
+    const card = this.getCard(cardId);
+    if (card) {
+      card.isLocked = !card.isLocked;
+      console.log(cardId, card.isLocked);
+      this._save("toggleLockCard", cardId);
+      this.addUndoable();
+    }
+  }
+
   deleteCard(contentId: string) {
+    const card = this.getCard(contentId);
+    if (card?.isLocked) {
+      return;
+    }
     this.deleteBlock(contentId);
     this.currentSpace.cards = this.currentSpace.cards.filter(
       (c) => c.contentId !== contentId,
