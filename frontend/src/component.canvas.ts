@@ -229,6 +229,9 @@ export class CanvasComponent {
 
     if (card.isLocked) {
       container.classList.add("locked");
+      container
+        .querySelector(".card-action-button[data-action='lock'] svg use")
+        ?.setAttribute("href", "#icon-locked");
     }
 
     autosize.update(textbox);
